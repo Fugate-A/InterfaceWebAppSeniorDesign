@@ -1,14 +1,13 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import Button from './ButtonExample';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Erm
-        </p>
+        <h1>React Frontend</h1>
+        <Button />
       </header>
     </div>
   );
