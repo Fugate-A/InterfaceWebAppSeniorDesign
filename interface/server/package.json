@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "react-draggable": "^4.4.6",
+    "react-router-dom": "^6.25.1"
   }
 }

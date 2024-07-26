@@ -1,19 +1,24 @@
 const express = require('express');
 const cors = require('cors');
+
 const app = express();
 const port = 5000;
 
-// Enables CORS requests
-app.use(cors());
+// Middleware
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json()); // Enable JSON body parsing for POST requests
+app.use(express.urlencoded({ extended: true })); // Enable URL-encoded body parsing for POST requests
 
-// API routes in api.js
+// Import API routes
 const apiRoutes = require('./api');
-app.use('/api', apiRoutes); // for routes with the prefix `/api`
+
+// Use the API routes
+app.use('/api', apiRoutes); // All routes defined in api.js will have the prefix `/api`
 
 // Additional route directly in index.js for demonstration
 app.get('/api/example-direct', (req, res) => {
   console.log('Received request to /api/example-direct');
-  res.json({ message: 'Hello from Express backend directly in index.js!' });
+  res.json({ message: 'Hello from Express backend directly in index.js!'});
 });
 
 // Start the server
