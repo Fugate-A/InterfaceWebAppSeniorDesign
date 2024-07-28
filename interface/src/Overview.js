@@ -1,38 +1,44 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Draggable from 'react-draggable'; // Import Draggable component
-import './Overview.css'; // Import CSS for styling
+import Moveable from 'react-moveable';
+import './Overview.css';
 
 const Overview = () => {
-  // Initialize positions and rotations for 9 squares
-  const initialItems = Array.from({ length: 9 }, (_, index) => ({
-    id: index + 1,
-    x: (index % 3) * 120, // Initial X position
-    y: Math.floor(index / 3) * 120, // Initial Y position
-    rotation: 0
-  }));
+  const [items, setItems] = useState(
+    Array.from({ length: 9 }, (_, index) => ({
+      id: index + 1,
+      x: (index % 3) * 120 + 60, // Center X position
+      y: Math.floor(index / 3) * 120 + 60, // Center Y position
+      width: 100,
+      height: 100,
+      rotation: 0
+    }))
+  );
 
-  const [items, setItems] = useState(initialItems);
-
-  const handleDrag = (e, data, id) => {
+  const handleDrag = (id, { left, top }) => {
     setItems(prevItems =>
       prevItems.map(item =>
         item.id === id
-          ? { ...item, x: data.x, y: data.y }
+          ? {
+              ...item,
+              x: left + item.width / 2,
+              y: top + item.height / 2
+            }
           : item
       )
     );
   };
 
-  const handleRotate = (id) => {
+  const handleRotate = (id, { rotate }) => {
     setItems(prevItems =>
-      prevItems.map(item => {
-        if (item.id === id) {
-          const newRotation = (item.rotation + 45) % 360; // Rotate 45 degrees and limit to 360 degrees
-          return { ...item, rotation: newRotation };
-        }
-        return item;
-      })
+      prevItems.map(item =>
+        item.id === id
+          ? {
+              ...item,
+              rotation: rotate
+            }
+          : item
+      )
     );
   };
 
@@ -41,44 +47,63 @@ const Overview = () => {
       <nav>
         <ul>
           <li>
-            <Link to="/">Home</Link> {/* Link to home */}
+            <Link to="/">Home</Link>
           </li>
         </ul>
       </nav>
       <div className="grid-container">
-        {items.map(({ id, x, y, rotation }) => (
-          <Draggable
+        {items.map(({ id, x, y, width, height, rotation }) => (
+          <div
             key={id}
-            position={{ x, y }}
-            onDrag={(e, data) => handleDrag(e, data, id)}
-            onStop={(e, data) => handleDrag(e, data, id)} // Update position after drag stop
+            className={`box-container box-${id}`}
+            style={{
+              position: 'absolute',
+              left: x - width / 2,
+              top: y - height / 2,
+              width: `${width}px`,
+              height: `${height}px`,
+              transform: `rotate(${rotation}deg)`,
+              transformOrigin: 'center center',
+              backgroundColor: 'lightgray',
+              border: '1px solid #333',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'grab',
+              boxSizing: 'border-box'
+            }}
           >
-            <div
-              className="draggable-wrapper"
-              style={{
-                transform: `rotate(${rotation}deg)`, // Apply rotation
-                transformOrigin: 'center center', // Ensure rotation is around center
-                position: 'relative',
-                width: '100px',
-                height: '100px'
-              }}
-            >
-              <div className="square">
-                {id}
-                <button
-                  className="rotate-button"
-                  onClick={() => handleRotate(id)} // Rotate 45 degrees on click
-                >
-                  Rotate
-                </button>
-              </div>
+            <Moveable
+              target={`.box-${id}`}
+              draggable={true}
+              rotatable={true}
+              throttleDrag={0}
+              throttleRotate={0}
+              onDrag={({ target, left, top }) => handleDrag(id, { left, top })}
+              onRotate={({ target, rotate }) => handleRotate(id, { rotate })}
+              edge={false} // Disable resize handles
+              keepRatio={false} // Ensure resizing doesn't keep the aspect ratio
+            />
+            <div className="box">
+              Box #{id}
             </div>
-          </Draggable>
+          </div>
         ))}
       </div>
       <div className="coordinates">
         {items.map(({ id, x, y, rotation }) => (
-          <p key={id}>Box #{id} pos: x: {x}px - y: {y}px - rotation: {rotation}°</p>
+          <div key={id} className="position-line">
+            <p>Box #{id} pos: x: {x}px - y: {y}px - rotation: {rotation}°</p>
+            <input
+              type="number"
+              value={rotation}
+              onChange={(e) => handleRotate(id, { rotate: Math.round(parseFloat(e.target.value) / 5) * 5 })}
+              step="5"
+              min="0"
+              max="360"
+            />
+            <span>°</span>
+          </div>
         ))}
       </div>
     </div>

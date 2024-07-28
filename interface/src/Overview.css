@@ -1,37 +1,33 @@
-.overview-container {
-    padding: 20px;
-  }
-  
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns */
-    grid-gap: 10px;
-    width: 360px; /* Adjust width as needed */
-    height: 360px; /* Adjust height as needed */
-    border: 2px solid black; /* Black outline */
-    position: relative;
-  }
-  
-  .draggable-wrapper {
-    display: flex; /* Ensure proper alignment and positioning */
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .square {
-    width: 100px;
-    height: 100px;
-    background-color: lightgray;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #333;
-    cursor: pointer;
-    box-sizing: border-box; /* Include border in width/height */
-  }
-  
-  .rotate-button {
-    margin-top: 10px;
-    padding: 5px;
-  }
-  
+.box-container {
+  position: relative;
+  overflow: hidden; /* Ensure handles do not overflow */
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background-color: lightgray;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.position-line {
+  margin-top: 10px;
+}
+
+.position-line input {
+  width: 80px;
+  margin-right: 5px;
+}
+
+.position-line span {
+  margin-left: 5px;
+}
+
+.position-line button {
+  margin-left: 10px;
+  padding: 5px;
+}
