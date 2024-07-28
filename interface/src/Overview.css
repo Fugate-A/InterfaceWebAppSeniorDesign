@@ -1,3 +1,38 @@
+.overview-container {
+  padding: 20px;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+nav li {
+  display: inline;
+  margin-right: 10px;
+}
+
+.boundary {
+  position: relative;
+  width: 100%;
+  height: 50vh; /* Upper half of the screen */
+  overflow: hidden;
+}
+
+.grid-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid black;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+  justify-items: center;
+  align-items: center;
+}
+
 .box-container {
   position: relative;
   overflow: hidden; /* Ensure handles do not overflow */
