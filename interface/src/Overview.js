@@ -44,10 +44,20 @@ const Overview = () => {
 
   const apiUrl = process.env.REACT_APP_API_URL; // Use the environment variable
 
-  // Fetch configuration from server
   useEffect(() => {
+    if (!apiUrl) {
+      console.error("API URL is undefined. Please check your environment variables.");
+      return;
+    }
+
+    // Fetch configuration from server
     fetch(`${apiUrl}/api/load-configuration`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         setItems(data.items);
       })
@@ -87,7 +97,6 @@ const Overview = () => {
               )
             )
           ) {
-            // Simple response: return the items to the previous state if there's overlap
             return prevItems;
           }
         }
@@ -125,6 +134,11 @@ const Overview = () => {
   };
 
   const handleSaveConfiguration = () => {
+    if (!apiUrl) {
+      console.error("API URL is undefined. Please check your environment variables.");
+      return;
+    }
+
     const configuration = { items };
     console.log('Saving configuration:', configuration);
 
@@ -135,7 +149,12 @@ const Overview = () => {
       },
       body: JSON.stringify(configuration),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log('Configuration saved successfully:', data);
       })
