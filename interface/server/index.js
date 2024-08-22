@@ -1,24 +1,27 @@
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
+const apiRoutes = require('./api'); // Import your API routes
+const { connectToDatabase } = require('./server'); // Import the function to connect to the database
 
 const app = express();
 const port = 5000;
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Enable JSON body parsing for POST requests
-app.use(express.urlencoded({ extended: true })); // Enable URL-encoded body parsing for POST requests
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Import API routes
-const apiRoutes = require('./api');
+// Connect to MongoDB
+connectToDatabase();
 
 // Use the API routes
-app.use('/api', apiRoutes); // All routes defined in api.js will have the prefix `/api`
+app.use('/api', apiRoutes);
 
 // Additional route directly in index.js for demonstration
 app.get('/api/example-direct', (req, res) => {
   console.log('Received request to /api/example-direct');
-  res.json({ message: 'Hello from Express backend directly in index.js!'});
+  res.json({ message: 'Hello from Express backend directly in index.js!' });
 });
 
 // Start the server

@@ -1,2 +1,3 @@
 SeniorDesignInterfaceWebAppWorkspaceFile.code-workspace
 interface/.env
+interface/server/.env

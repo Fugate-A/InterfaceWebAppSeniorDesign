@@ -1,9 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Moveable from 'react-moveable';
 import './Overview.css';
 
-// Utility function to check if two boxes overlap
+// Collision blocking
 const isOverlapping = (boxA, boxB) => {
   return !(
     boxA.x + boxA.width <= boxB.x ||
@@ -26,7 +26,7 @@ const getBoundingBox = (x, y, width, height, rotation) => {
     x: x - newWidth / 2,
     y: y - newHeight / 2,
     width: newWidth,
-    height: newHeight
+    height: newHeight,
   };
 };
 
@@ -38,18 +38,30 @@ const Overview = () => {
       y: Math.floor(index / 3) * 120 + 60, // Center Y position
       width: 100,
       height: 100,
-      rotation: 0
+      rotation: 0,
     }))
   );
 
+  const apiUrl = process.env.REACT_APP_API_URL; // Use the environment variable
+
+  // Fetch configuration from server
+  useEffect(() => {
+    fetch(`${apiUrl}/api/load-configuration`)
+      .then((response) => response.json())
+      .then((data) => {
+        setItems(data.items);
+      })
+      .catch((error) => console.error('Error loading configuration:', error));
+  }, [apiUrl]);
+
   const handleDrag = useCallback((id, { left, top }) => {
-    setItems(prevItems => {
-      const newItems = prevItems.map(item =>
+    setItems((prevItems) => {
+      const newItems = prevItems.map((item) =>
         item.id === id
           ? {
               ...item,
               x: left + item.width / 2,
-              y: top + item.height / 2
+              y: top + item.height / 2,
             }
           : item
       );
@@ -57,11 +69,25 @@ const Overview = () => {
       // Check for overlaps and adjust positions if necessary
       for (let i = 0; i < newItems.length; i++) {
         for (let j = i + 1; j < newItems.length; j++) {
-          if (isOverlapping(
-            getBoundingBox(newItems[i].x, newItems[i].y, newItems[i].width, newItems[i].height, newItems[i].rotation),
-            getBoundingBox(newItems[j].x, newItems[j].y, newItems[j].width, newItems[j].height, newItems[j].rotation)
-          )) {
-            // Simple response: just return the items to the previous state if there's overlap
+          if (
+            isOverlapping(
+              getBoundingBox(
+                newItems[i].x,
+                newItems[i].y,
+                newItems[i].width,
+                newItems[i].height,
+                newItems[i].rotation
+              ),
+              getBoundingBox(
+                newItems[j].x,
+                newItems[j].y,
+                newItems[j].width,
+                newItems[j].height,
+                newItems[j].rotation
+              )
+            )
+          ) {
+            // Simple response: return the items to the previous state if there's overlap
             return prevItems;
           }
         }
@@ -72,12 +98,12 @@ const Overview = () => {
   }, []);
 
   const handleRotate = useCallback((id, { rotate }) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
+    setItems((prevItems) =>
+      prevItems.map((item) =>
         item.id === id
           ? {
               ...item,
-              rotation: rotate % 360
+              rotation: rotate % 360,
             }
           : item
       )
@@ -86,16 +112,34 @@ const Overview = () => {
 
   const handleRotationInputChange = (id, value) => {
     const angle = parseFloat(value) || 0;
-    setItems(prevItems =>
-      prevItems.map(item =>
+    setItems((prevItems) =>
+      prevItems.map((item) =>
         item.id === id
           ? {
               ...item,
-              rotation: angle % 360
+              rotation: angle % 360,
             }
           : item
       )
     );
+  };
+
+  const handleSaveConfiguration = () => {
+    const configuration = { items };
+    console.log('Saving configuration:', configuration);
+
+    fetch(`${apiUrl}/api/save-configuration`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(configuration),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Configuration saved successfully:', data);
+      })
+      .catch((error) => console.error('Error saving configuration:', error));
   };
 
   return (
@@ -127,7 +171,7 @@ const Overview = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'grab',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
               }}
             >
               <Moveable
@@ -141,9 +185,7 @@ const Overview = () => {
                 edge={false} // Disable resize handles
                 keepRatio={false} // Ensure resizing doesn't keep the aspect ratio
               />
-              <div className="box">
-                Box #{id}
-              </div>
+              <div className="box">Box #{id}</div>
             </div>
           ))}
         </div>
@@ -151,7 +193,9 @@ const Overview = () => {
       <div className="coordinates">
         {items.map(({ id, x, y, rotation }) => (
           <div key={id} className="position-line">
-            <p>Box #{id} pos: x: {x}px - y: {y}px - rotation: {rotation}°</p>
+            <p>
+              Box #{id} pos: x: {x}px - y: {y}px - rotation: {rotation}°
+            </p>
             <input
               type="number"
               value={rotation}
@@ -164,6 +208,7 @@ const Overview = () => {
           </div>
         ))}
       </div>
+      <button onClick={handleSaveConfiguration}>Save Configuration</button>
     </div>
   );
 };
