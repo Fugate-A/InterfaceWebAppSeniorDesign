@@ -12,16 +12,15 @@ router.post('/save-configuration', async (req, res) => {
   }
 
   try {
-    const db = client.db('YourDatabaseName'); // Replace with your actual database name
-    const configurationCollection = db.collection('Configuration'); // Replace with your actual collection name
-    // Create a new Configuration document with the received items
-    await configurationCollection.insertOne({ items });
+    const db = client.db('YourDatabaseName');                               // Replace with your actual database name
+    const configurationCollection = db.collection('Configuration');         // Replace with your actual collection name
+    
+    await configurationCollection.insertOne({ items });                     // Create a new collection document with the sent items (chairs)
+    
+    res.status(201).json({ message: 'Configuration saved successfully!' }); // Respond with a success message
 
-    // Respond with a success message
-    res.status(201).json({ message: 'Configuration saved successfully!' });
   } catch (error) {
-    // Log the error and send an error response
-    console.error('Error saving configuration:', error);
+    console.error('Error saving configuration:', error);                    // Log the error and send an error response
     res.status(500).json({ message: 'Failed to save configuration.' });
   }
 });
@@ -35,16 +34,14 @@ router.get('/load-layouts', async (req, res) => {
   }
 
   try {
-    const db = client.db('YourDatabaseName'); // Replace with your actual database name
-    //const layoutsCollection = db.collection('Layouts'); // Replace with your actual collection name
-    const layoutsCollection = db.collection('Configuration'); // Replace with your actual collection name
+    const db = client.db('YourDatabaseName');                     // Replace with your actual database name
+    const layoutsCollection = db.collection('Configuration');     // Replace with your actual collection name
     const layouts = await layoutsCollection.find({}).toArray();
 
-    // Respond with the fetched layouts
-    res.json({ layouts });
+    res.json({ layouts });                                        // Respond with the fetched layouts
+
   } catch (error) {
-    // Log the error and send an error response
-    console.error('Error loading layouts:', error);
+    console.error('Error loading layouts:', error);               // Log the error and send an error response
     res.status(500).json({ message: 'Failed to load layouts.' });
   }
 });
