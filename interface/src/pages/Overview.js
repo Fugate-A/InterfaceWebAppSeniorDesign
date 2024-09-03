@@ -42,7 +42,7 @@ const Overview = () => {
     }))
   );
 
-  const apiUrl = process.env.REACT_APP_API_URL; // Use the environment variable
+  const apiUrl = process.env.REACT_APP_API_URL; 
 
   useEffect(() => {
     if (!apiUrl) {
