@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getClient } = require('./server'); // Import MongoDB client
+const { getClient } = require('./server'); //mongo
 
 // Save box configuration to MongoDB
 router.post('/save-configuration', async (req, res) => {
@@ -12,15 +12,15 @@ router.post('/save-configuration', async (req, res) => {
   }
 
   try {
-    const db = client.db('YourDatabaseName');                               // Replace with your actual database name
-    const configurationCollection = db.collection('Configuration');         // Replace with your actual collection name
+    const db = client.db( process.env.LocalRoomName );                       //database name in mongo that is configurable in one spot in the env for any application, can hold more than configuartions such as users
+    const configurationCollection = db.collection('Configurations');         //collection name for where chair are stored
     
     await configurationCollection.insertOne({ items });                     // Create a new collection document with the sent items (chairs)
     
-    res.status(201).json({ message: 'Configuration saved successfully!' }); // Respond with a success message
+    res.status(201).json({ message: 'Configuration saved successfully!' }); //respond success
 
   } catch (error) {
-    console.error('Error saving configuration:', error);                    // Log the error and send an error response
+    console.error('Error saving configuration:', error);                    //log error and send response
     res.status(500).json({ message: 'Failed to save configuration.' });
   }
 });
@@ -34,14 +34,14 @@ router.get('/load-layouts', async (req, res) => {
   }
 
   try {
-    const db = client.db('YourDatabaseName');                     // Replace with your actual database name
-    const layoutsCollection = db.collection('Configuration');     // Replace with your actual collection name
+    const db = client.db( process.env.LocalRoomName );             
+    const layoutsCollection = db.collection('Configurations');     
     const layouts = await layoutsCollection.find({}).toArray();
 
-    res.json({ layouts });                                        // Respond with the fetched layouts
+    res.json({ layouts });                                        //gets fetched layouts
 
   } catch (error) {
-    console.error('Error loading layouts:', error);               // Log the error and send an error response
+    console.error('Error loading layouts:', error);               //log the error and send response
     res.status(500).json({ message: 'Failed to load layouts.' });
   }
 });

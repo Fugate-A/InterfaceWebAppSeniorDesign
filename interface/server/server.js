@@ -1,12 +1,12 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 
-let client; // This will hold the MongoClient instance
+let client; //let allows the mongo connection to be maintained whule server is running
 
 const connectToDatabase = async () => {
   try {
-    // Retrieve the MongoDB connection string from environment variables
-    const uri = process.env.LocalMachineMongoURL;
+    
+    const uri = process.env.LocalMachineMongoURL; //connection string from env
 
     if (!uri) {
       throw new Error('MongoDB URI is not defined in the environment variables.');

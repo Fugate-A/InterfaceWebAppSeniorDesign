@@ -1,28 +1,20 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); //env vars
 const express = require('express');
-const cors = require('cors');
-const apiRoutes = require('./api'); // Import your API routes
-const { connectToDatabase } = require('./server'); // Import the function to connect to the database
+const cors = require('cors'); //cross origin
+const apiRoutes = require('./api'); //routes file
+const { connectToDatabase } = require('./server'); //require mongo connection
 
 const app = express();
 const port = 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
 connectToDatabase();
 
 // Use the API routes
 app.use('/api', apiRoutes);
-
-// Additional route directly in index.js for demonstration
-app.get('/api/example-direct', (req, res) => {
-  console.log('Received request to /api/example-direct');
-  res.json({ message: 'Hello from Express backend directly in index.js!' });
-});
 
 // Start the server
 app.listen(port, () => {
