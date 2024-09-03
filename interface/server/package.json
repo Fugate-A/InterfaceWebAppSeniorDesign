@@ -1,7 +1,7 @@
 {
-  "name": "your-server-app-name",
+  "name": "SeniorDesignChairServer",
   "version": "1.0.0",
-  "description": "Your server description",
+  "description": "Webapp for our Self-Configurable Chair System for Senior Design at UCF Fall 2024",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
