@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Moveable from 'react-moveable';
-import './Overview.css';
+import '../components/Overview.css';
 
 // Collision blocking
 const isOverlapping = (boxA, boxB) => {

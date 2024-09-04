@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LayoutCard from '../components/LayoutCard'; // Import the LayoutCard component
+import LayoutCard from '../components/LayoutCard';
 
 const LayoutListPage = () => {
   const [layouts, setLayouts] = useState([]);
@@ -13,12 +13,11 @@ const LayoutListPage = () => {
   };
 
   useEffect(() => {
-    fetchLayouts(); // Load layouts when component mounts
+    fetchLayouts();
 
-    // Optional: Set up a periodic refresh (e.g., every 60 seconds)
-    const interval = setInterval(fetchLayouts, 60000); // Refresh every 60 seconds
+    const interval = setInterval(fetchLayouts, 60000);
 
-    return () => clearInterval(interval); // Clean up interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -27,20 +26,20 @@ const LayoutListPage = () => {
         <nav>
           <ul>
             <li>
-              <Link to="/">Home</Link> {/* Link back to the main page */}
+              <Link to="/">Home</Link>
             </li>
             <li>
-              <button onClick={fetchLayouts}>Refresh Layouts</button> {/* Button to manually refresh */}
+              <button onClick={fetchLayouts}>Refresh Layouts</button>
             </li>
           </ul>
         </nav>
       </header>
       <h1>Layouts</h1>
       {layouts.length === 0 ? (
-        <p>No layouts found.</p> // Message if no layouts are available
+        <p>No layouts found.</p>
       ) : (
         layouts.map((layout) => (
-          <LayoutCard key={layout._id} layout={layout} /> // Render each layout using LayoutCard
+          <LayoutCard key={layout._id} layout={layout} />
         ))
       )}
     </div>

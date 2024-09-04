@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import Moveable from 'react-moveable';
-import './Overview.css';
+import '../components/Overview.css';
 
 const CreateLayoutPage = () => {
   const [boxes, setBoxes] = useState([]);
