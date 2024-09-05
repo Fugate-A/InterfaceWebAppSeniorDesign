@@ -14,7 +14,7 @@ const LayoutCard = ({ layout }) => {
 
   return (
     <div className="layout-card">
-      <h2>{layout.name || 'Untitled Layout'}</h2> {/* Display layout name or a default message */}
+      <h2>{layout.layoutName || 'Untitled Layout'}</h2> {/* Display layout name or a default message */}
       <p>ID: {layout._id}</p> {/* Display layout ID */}
       <button onClick={handleShowDetails}>View Details</button> {/* Button to show details */}
 

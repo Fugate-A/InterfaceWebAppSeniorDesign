@@ -66,7 +66,12 @@ const CreateLayoutPage = () => {
       return;
     }
 
-    const configuration = { items: boxes };  // Wrap boxes in an "items" key to match the API's expected structure
+    if (!name.trim()) {
+      console.error("Layout name is required.");
+      return;
+    }
+
+    const configuration = { layoutName: name, items: boxes };  // Include layoutName and items
     console.log('Saving configuration:', configuration);
 
     fetch(`${apiUrl}/api/save-configuration`, {
@@ -74,7 +79,7 @@ const CreateLayoutPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(configuration),
+      body: JSON.stringify(configuration),  // Send layoutName and items
     })
       .then((response) => {
         if (!response.ok) {
