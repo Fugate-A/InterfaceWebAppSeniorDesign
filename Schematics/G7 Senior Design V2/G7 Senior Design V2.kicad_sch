@@ -9069,6 +9069,25 @@
 		)
 		(uuid "fb2e67a4-70ab-4871-9dcb-289ad0bb7b54")
 	)
+	(text_box "test\n"
+		(exclude_from_sim no)
+		(at 214.63 58.42 0)
+		(size 20.32 8.89)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "cf083a43-5d25-4d20-8b32-50f0d77e8339")
+	)
 	(text "+12V"
 		(exclude_from_sim no)
 		(at 384.302 42.164 0)
