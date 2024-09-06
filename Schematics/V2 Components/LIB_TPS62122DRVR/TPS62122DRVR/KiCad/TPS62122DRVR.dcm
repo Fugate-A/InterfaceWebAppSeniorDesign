@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP TPS62122DRVR
+D TEXAS INSTRUMENTS - TPS62122DRVR - DC-DC Switching (Step Down) Regulator, Adjustable, 800 kHz, 2V-15Vin, 1.2V-5.5V/75 mA out, WSON-6
+K
+F http://www.ti.com/lit/ds/symlink/tps62122.pdf?ts=1591208997246
+$ENDCMP
+#
+#End Doc Library

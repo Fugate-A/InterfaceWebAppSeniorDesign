@@ -1,0 +1,11 @@
+FILE_TYPE = MULTI_PHYS_TABLE;
+
+PART 'GRM219C80J475KE19D'
+CLASS = DISCRETE
+{========================================================================================}
+:"MANUFACTURER_NAME", "MANUFACTURER_PART_NUMBER"= "PART_NUMBER", "JEDEC_TYPE", "PACK_TYPE", "MOUSER_PART_NUMBER", "MOUSER_PRICE/STOCK", "DESCRIPTION", "DATASHEET", "HEIGHT";
+{========================================================================================}
+ "Murata Electronics", "GRM219C80J475KE19D" (!) = "", "CAPC2012X95N", "Capacitor Chip Non-polarised", "81-GRM219C80J475KE9D", "https://www.mouser.co.uk/ProductDetail/Murata-Electronics/GRM219C80J475KE19D?qs=1H9tZOlVdUAU5TSvoHHPuA%3D%3D", "Murata 0805 GRM 4.7uF Ceramic Multilayer Capacitor, 6.3 V dc, +105C, X6S Dielectric, +/-10% SMD", "http://www.murata.com/~/media/webrenewal/support/library/catalog/products/capacitor/mlcc/c02e.pdf", "0.95 mm"
+END_PART
+
+END.

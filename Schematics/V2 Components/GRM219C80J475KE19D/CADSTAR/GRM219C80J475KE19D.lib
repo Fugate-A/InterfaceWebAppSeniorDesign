@@ -1,0 +1,16 @@
+.GRM219C80J475KE19D :1 ;Murata 0805 GRM 4.7uF Ceramic Multilayer Capacitor, 6.3 V dc, +105C, X6S Dielectric, +/-10% SMD
+CAPC2012X95N
+*STM C
+*NGS
+*PLB 1="1" 2="2"
+*MXP 2
+*DFN GRM219C80J475KE19D
+~!Mouser Part Number (81-GRM219C80J475KE9D)
+~!Link Mouser Price/Stock (https://www.mouser.co.uk/ProductDetail/Murata-Electronics/GRM219C80J475KE19D?qs=1H9tZOlVdUAU5TSvoHHPuA%3D%3D)
+~!Manufacturer_Name (Murata Electronics)
+~!Manufacturer_Part_Number (GRM219C80J475KE19D)
+~!Link Datasheet (http://www.murata.com/~/media/webrenewal/support/library/catalog/products/capacitor/mlcc/c02e.pdf)
+~!Height (0.95mm)
+~!3D_Model (GRM219C80J475KE19D)
+GRM219C80J475KE19D
+1.1!U 2.1!U 

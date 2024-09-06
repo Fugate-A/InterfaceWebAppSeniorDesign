@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP LPS3015-183MRC
+D COILCRAFT - LPS3015-183MRC - Power Inductor (SMD), 18 H, 430 mA, Shielded, 580 mA, LPS3015 Series, 2.95mm x 2.95mm x 1.4mm
+K
+F https://www.coilcraft.com/getmedia/5d262731-85ef-4348-8ab4-1044b4fc3cb8/lps3015.pdf
+$ENDCMP
+#
+#End Doc Library

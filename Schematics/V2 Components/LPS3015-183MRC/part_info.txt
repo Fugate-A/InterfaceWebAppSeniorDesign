@@ -1,0 +1,9 @@
+Manufacturer=COILCRAFT
+PartNumber=LPS3015-183MRC
+PartCategory=Inductor
+PackageCategory=Other
+PinCount=2
+Version=1.2
+Released=2022-01-19 15:55:45
+Downloaded=2024-07-22 14:26:38
+3D=N

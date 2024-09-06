@@ -1,0 +1,11 @@
+FILE_TYPE = MULTI_PHYS_TABLE;
+
+PART 'VJ0805Y104KBABE31'
+CLASS = DISCRETE
+{========================================================================================}
+:"MANUFACTURER_NAME", "MANUFACTURER_PART_NUMBER"= "PART_NUMBER", "JEDEC_TYPE", "PACK_TYPE", "MOUSER_PART_NUMBER", "MOUSER_PRICE/STOCK", "DESCRIPTION", "DATASHEET", "HEIGHT";
+{========================================================================================}
+ "Vishay", "VJ0805Y104KBABE31" (!) = "", "CAPC2012X145N", "Capacitor Chip Non-polarised", "77-VJ0805Y104KBABE31", "https://www.mouser.co.uk/ProductDetail/Vishay-Vitramon/VJ0805Y104KBABE31?qs=TLaLXeh6c70yB%252BsdRZoYCQ%3D%3D", "Multilayer Ceramic Capacitors MLCC - SMD/SMT 0805 .1uF 50volts X7R 10%", "", "1.45 mm"
+END_PART
+
+END.

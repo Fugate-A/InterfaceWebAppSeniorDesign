@@ -1,0 +1,135 @@
+
+(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)
+  (symbol "PJ-051AH" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+    (property "Reference" "J" (id 0) (at -7.70165 7.6788 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Value" "PJ-051AH" (id 1) (at -7.69554 -12.759 0)
+      (effects (font (size 1.27 1.27)) (justify bottom left))
+    )
+    (property "Footprint" "PJ-051AH:CUI_PJ-051AH" (id 2) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "STANDARD" "Manufacturer Recommendation" (id 4) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "SNAPEDA_PN" "PJ-051AH" (id 5) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MAXIMUM_PACKAGE_HEIGHT" "7.4 mm" (id 6) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "PART_REV" "1.0" (id 7) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (property "MANUFACTURER" "CUI Devices" (id 8) (at 0 0 0)
+      (effects (font (size 1.27 1.27)) (justify bottom) hide)
+    )
+    (symbol "PJ-051AH_0_0"
+      (arc (start -3.175 6.35) (mid -4.445 5.08) (end -3.175 3.81)
+        (stroke (width 0.1524) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (polyline
+        (pts (xy -3.175 6.35) (xy 3.81 6.35)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.81 6.35) (xy 3.81 3.81)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.81 3.81) (xy -3.175 3.81)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.81 3.81) (xy 3.81 3.175)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.81 3.175) (xy 5.08 3.175)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 5.08 3.175) (xy 5.08 5.08)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 5.08 5.08) (xy 5.08 6.985)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 5.08 6.985) (xy 3.81 6.985)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 3.81 6.985) (xy 3.81 6.35)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 2.54 0.0) (xy -0.635 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -0.635 0.0) (xy -1.27 1.27)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy -1.27 1.27) (xy -1.905 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 2.54 2.54) (xy 2.54 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts
+          (xy 2.54 0.0)
+          (xy 2.032 1.27)
+          (xy 3.048 1.27)
+          (xy 2.54 0.0)
+        )
+        (stroke (width 0.1524)) (fill (type outline))
+      )
+      (polyline
+        (pts (xy 2.54 0.0) (xy 7.62 0.0)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 2.54 2.54) (xy 7.62 2.54)) (stroke (width 0.1524))
+      )
+      (polyline
+        (pts (xy 5.08 5.08) (xy 7.62 5.08)) (stroke (width 0.1524))
+      )
+      (rectangle (start -7.62 -10.16) (end 7.62 7.62)
+        (stroke (width 0.254)) (fill (type background))
+      )
+      (pin passive line (at 12.7 5.08 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "1"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin passive line (at 12.7 2.54 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "3"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin passive line (at 12.7 0.0 180.0) (length 5.08)
+        (name "~"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "2"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin passive line (at 12.7 -5.08 180.0) (length 5.08)
+        (name "SHIELD"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "S1"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+      (pin passive line (at 12.7 -7.62 180.0) (length 5.08)
+        (name "SHIELD__1"
+          (effects (font (size 1.016 1.016)))
+        )
+        (number "S2"
+          (effects (font (size 1.016 1.016)))
+        )
+      )
+    )
+  )
+)

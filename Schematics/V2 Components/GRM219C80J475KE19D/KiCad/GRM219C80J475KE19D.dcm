@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP GRM219C80J475KE19D
+D Murata 0805 GRM 4.7uF Ceramic Multilayer Capacitor, 6.3 V dc, +105C, X6S Dielectric, +/-10% SMD
+K
+F http://www.murata.com/~/media/webrenewal/support/library/catalog/products/capacitor/mlcc/c02e.pdf
+$ENDCMP
+#
+#End Doc Library

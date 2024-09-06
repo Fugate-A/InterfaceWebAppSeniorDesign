@@ -1,0 +1,9 @@
+Manufacturer=Murata Electronics
+PartNumber=GRM219C80J475KE19D
+PartCategory=Capacitor
+PackageCategory=Capacitor Chip Non-polarised
+PinCount=2
+Version=1.2
+Released=2023-03-07 09:33:22
+Downloaded=2024-09-01 18:43:59
+3D=Y
