@@ -10140,6 +10140,16 @@
 	)
 	(wire
 		(pts
+			(xy 303.53 90.17) (xy 293.37 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6fd7573-bd7f-49cf-9480-e751835efec8")
+	)
+	(wire
+		(pts
 			(xy 44.45 143.51) (xy 66.04 143.51)
 		)
 		(stroke
@@ -10972,6 +10982,72 @@
 			(justify left bottom)
 		)
 		(uuid "784d889c-0689-4a54-84c4-4d438c29c2bd")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 182.88 27.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "073f22ac-0976-4578-a805-7e542665d2b8")
+		(property "Reference" "#PWR020"
+			(at 182.88 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 182.88 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 182.88 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 182.88 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 182.88 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f2ecd0eb-a98c-4fb6-9cfa-06ac9174d1e1")
+		)
+		(instances
+			(project "G7 Senior Design V2"
+				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
+					(reference "#PWR020")
+					(unit 1)
+				)
+			)
+		)
 	)
 	(symbol
 		(lib_id "87583-2010RLF:87583-2010RLF")
@@ -12220,6 +12296,72 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 293.37 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "39f1a275-26ec-4d9b-81ee-7f5a017ef73b")
+		(property "Reference" "#PWR024"
+			(at 293.37 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 293.37 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 293.37 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 293.37 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 293.37 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d8a57240-9834-430b-8dce-c1652d270dc7")
+		)
+		(instances
+			(project "G7 Senior Design V2"
+				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
+					(reference "#PWR024")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 360.68 48.26 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -12344,6 +12486,76 @@
 			(project "G7 Senior Design V2"
 				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
 					(reference "#PWR012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "2024-09-06_13-28-08:CC0805KRX7R9BB104")
+		(at 303.53 92.71 90)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "4222f9c2-0bf6-4b9e-8248-acc585cf870b")
+		(property "Reference" "C14-0.1uF3"
+			(at 309.88 96.52 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Value" "CC0805KRX7R9BB104"
+			(at 307.34 96.52 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Footprint" "SD V2 ESP32 Components:CC0805N_YAG"
+			(at 303.53 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "CC0805KRX7R9BB104"
+			(at 303.53 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 303.53 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "15e8c2f4-9745-492c-80c3-9509f8c1b30c")
+		)
+		(pin "2"
+			(uuid "441499f8-5cb7-4a07-a432-a9e3882f1948")
+		)
+		(instances
+			(project "G7 Senior Design V2"
+				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
+					(reference "C14-0.1uF3")
 					(unit 1)
 				)
 			)
@@ -12875,6 +13087,76 @@
 			(project "G7 Senior Design V2"
 				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
 					(reference "#PWR05")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "2024-09-06_13-28-08:CC0805KRX7R9BB104")
+		(at 190.5 29.21 90)
+		(mirror x)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "65e8e2ee-a583-40aa-a17d-a58f055f7be6")
+		(property "Reference" "C9-0.1uF2"
+			(at 196.85 33.02 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Value" "CC0805KRX7R9BB104"
+			(at 194.31 33.02 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Footprint" "SD V2 ESP32 Components:CC0805N_YAG"
+			(at 190.5 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "CC0805KRX7R9BB104"
+			(at 190.5 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 190.5 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4fc1687a-9ac6-4e60-97b1-805cf886e1f2")
+		)
+		(pin "2"
+			(uuid "55b6fb65-4ca2-4bda-9ae1-7be5e625e1cf")
+		)
+		(instances
+			(project "G7 Senior Design V2"
+				(path "/d6a6f075-6e1e-447d-931d-d3bd161b37c4"
+					(reference "C9-0.1uF2")
 					(unit 1)
 				)
 			)
