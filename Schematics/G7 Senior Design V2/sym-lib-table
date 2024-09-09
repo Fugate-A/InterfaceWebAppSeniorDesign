@@ -24,4 +24,7 @@
   (lib (name "2024-09-06_13-19-00")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/EEL 4915L/KiCad Senior Design/V2 Components/LMK212BJ226MG-T/2024-09-06_13-19-00.kicad_sym")(options "")(descr ""))
   (lib (name "2024-09-06_13-28-08")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/EEL 4915L/KiCad Senior Design/V2 Components/CC0805KRX7R9BB104/2024-09-06_13-28-08.kicad_sym")(options "")(descr ""))
   (lib (name "2024-09-06_14-15-17")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/EEL 4915L/KiCad Senior Design/V2 Components/SS8050-G/2024-09-06_14-15-17.kicad_sym")(options "")(descr ""))
+  (lib (name "PTS_647_SN50_SMTR2_LFS")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/PTS 647 SN50 SMTR2 LFS/PTS_647_SN50_SMTR2_LFS.kicad_sym")(options "")(descr ""))
+  (lib (name "HSMW-C170-U0000")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/HSMW-C170-U0000/KiCad/HSMW-C170-U0000.kicad_sym")(options "")(descr ""))
+  (lib (name "2024-09-09_17-13-58")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/RMCF0805ZT0R00/2024-09-09_17-13-58.kicad_sym")(options "")(descr ""))
 )
