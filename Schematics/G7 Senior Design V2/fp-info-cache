@@ -1,4 +1,4 @@
-23693826594388229
+23700731257013048
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -88914,6 +88914,13 @@ PPTC191LFBN-RC
 19
 19
 SD V2 ESP32 Components
+CitronautHeadFootprint
+
+
+0
+0
+0
+SD V2 ESP32 Components
 MOD_ESP32-WROOM-32_EXP
 
 ESP32-WROOM-32-N4 
@@ -88927,6 +88934,27 @@ SW_PTS_647_SN50_SMTR2_LFS
 0
 4
 4
+SD V2 ESP32 Components
+UCF Logo
+
+
+0
+0
+0
+SD V2 ESP32 Components
+UCF Logo 2
+
+
+0
+0
+0
+SD V2 ESP32 Components
+UCF Logo Citronaut
+
+
+0
+0
+0
 SD V2 USB to UART Components
 AMPHENOL_87583-2010RLF
 
