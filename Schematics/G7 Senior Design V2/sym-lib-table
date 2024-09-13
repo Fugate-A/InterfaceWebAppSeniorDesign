@@ -32,4 +32,6 @@
   (lib (name "AMS1117-3.3")(type "KiCad")(uri "C:/Users/ebarc/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/AMS1117-3.3/AMS1117-3.3.kicad_sym")(options "")(descr ""))
   (lib (name "2024-09-06_13-19-002")(type "KiCad")(uri "C:/Users/ebarc/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/LMK212BJ226MG-T/2024-09-06_13-19-002.kicad_sym")(options "")(descr ""))
   (lib (name "2024-09-12_12-58-59")(type "KiCad")(uri "C:/Users/erikb/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/PPTC191LFBN_RC/KiCADv6/2024-09-12_12-58-59.kicad_sym")(options "")(descr ""))
+  (lib (name "2024-09-13_12-09-25")(type "KiCad")(uri "C:/Users/ebarc/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/RC0805FR_071KL/KiCADv6/2024-09-13_12-09-25.kicad_sym")(options "")(descr ""))
+  (lib (name "VJ0805Y104KXABE31")(type "KiCad")(uri "C:/Users/ebarc/OneDrive/Desktop/InterfaceWebAppSeniorDesign/Schematics/V2 Components/VJ0805Y104KXABE31/VJ0805Y104KXABE31.kicad_sym")(options "")(descr ""))
 )

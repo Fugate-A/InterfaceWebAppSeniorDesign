@@ -1,4 +1,4 @@
-23700731257013048
+23702458505868246
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -88886,6 +88886,13 @@ Integrated Circuit
 49
 49
 SD V2 DW1000 Components
+RC0805N_YAG
+
+RC0805FR-071KL 
+0
+2
+2
+SD V2 DW1000 Components
 RESC2012X65N
 
 
@@ -88978,8 +88985,8 @@ Capacitor
 2
 SD V2 USB to UART Components
 CAPC2012X145N
-VJ0805_2022-4
-Capacitor
+
+
 0
 2
 2
