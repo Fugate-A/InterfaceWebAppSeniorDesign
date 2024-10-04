@@ -1,9 +1,0 @@
-Manufacturer=Vishay
-PartNumber=VJ0805Y104KBABE31
-PartCategory=Capacitor
-PackageCategory=Capacitor Chip Non-polarised
-PinCount=2
-Version=1.1
-Released=2022-02-04 08:15:41
-Downloaded=2024-09-01 18:49:32
-3D=Y

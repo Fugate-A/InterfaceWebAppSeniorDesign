@@ -1,0 +1,11 @@
+FILE_TYPE = MULTI_PHYS_TABLE;
+
+PART 'LMK212BBJ226MG_T'
+CLASS = DISCRETE
+{========================================================================================}
+:"MANUFACTURER_NAME", "MANUFACTURER_PART_NUMBER"= "PART_NUMBER", "JEDEC_TYPE", "PACK_TYPE", "MOUSER_PART_NUMBER", "MOUSER_PRICE/STOCK", "DESCRIPTION", "DATASHEET", "HEIGHT";
+{========================================================================================}
+ "TAIYO YUDEN", "LMK212BBJ226MG-T" (!) = "", "CAPC2012X135N", "Capacitor Chip Non-polarised", "963-LMK212BBJ226MG-T", "https://www.mouser.co.uk/ProductDetail/Taiyo-Yuden/LMK212BBJ226MG-T?qs=Va%252BXcMGJzEt5r7CLFWWrQQ%3D%3D", "Taiyo Yuden 0805, 2012 M 22uF Ceramic Multilayer Capacitor, 10 V dc, +85C, X5R Dielectric, +/-20% SMD", "", "1.35 mm"
+END_PART
+
+END.

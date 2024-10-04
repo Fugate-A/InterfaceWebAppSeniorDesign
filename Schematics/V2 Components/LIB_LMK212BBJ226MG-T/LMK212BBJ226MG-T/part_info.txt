@@ -1,0 +1,9 @@
+Manufacturer=TAIYO YUDEN
+PartNumber=LMK212BBJ226MG-T
+PartCategory=Capacitor
+PackageCategory=Capacitor Chip Non-polarised
+PinCount=2
+Version=2.1
+Released=2019-04-24 19:45:54
+Downloaded=2024-09-12 00:12:59
+3D=Y

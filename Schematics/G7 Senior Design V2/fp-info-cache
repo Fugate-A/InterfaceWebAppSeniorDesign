@@ -1,4 +1,4 @@
-23680018586655030
+23702458505868246
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -88865,6 +88865,13 @@ rotary encoder illuminated switch vertical
 9
 8
 SD V2 DW1000 Components
+LEDC2012X90N
+HSMW-C170-U0000
+LED
+0
+2
+2
+SD V2 DW1000 Components
 MOD_DWM1000_QOR
 
 DWM1000 
@@ -88878,6 +88885,20 @@ Integrated Circuit
 0
 49
 49
+SD V2 DW1000 Components
+RC0805N_YAG
+
+RC0805FR-071KL 
+0
+2
+2
+SD V2 DW1000 Components
+RESC2012X65N
+
+
+0
+2
+2
 SD V2 ESP32 Components
 CAP_LMK212AB7106MG-T_TAY
 
@@ -88893,12 +88914,54 @@ CC0805KRX7R9BB104
 2
 2
 SD V2 ESP32 Components
+CONN19_PPTC191LFBN-RC_SUL
+
+PPTC191LFBN-RC 
+0
+19
+19
+SD V2 ESP32 Components
+CitronautHeadFootprint
+
+
+0
+0
+0
+SD V2 ESP32 Components
 MOD_ESP32-WROOM-32_EXP
 
 ESP32-WROOM-32-N4 
 0
 47
 47
+SD V2 ESP32 Components
+SW_PTS_647_SN50_SMTR2_LFS
+
+
+0
+4
+4
+SD V2 ESP32 Components
+UCF Logo
+
+
+0
+0
+0
+SD V2 ESP32 Components
+UCF Logo 2
+
+
+0
+0
+0
+SD V2 ESP32 Components
+UCF Logo Citronaut
+
+
+0
+0
+0
 SD V2 USB to UART Components
 AMPHENOL_87583-2010RLF
 
@@ -88922,8 +88985,8 @@ Capacitor
 2
 SD V2 USB to UART Components
 CAPC2012X145N
-VJ0805_2022-4
-Capacitor
+
+
 0
 2
 2
@@ -88938,6 +89001,13 @@ SD V2 USB to UART Components
 RC0805N_PAN
 
 ERJ-6GEYJ103V 
+0
+2
+2
+SD V2 USB to UART Components
+RESC2012X60N
+
+
 0
 2
 2
@@ -88969,6 +89039,13 @@ SS8050-G
 0
 3
 3
+SD V2 Voltage Regulator Components
+CAPC2012X135N
+0805_1
+Capacitor
+0
+2
+2
 SD V2 Voltage Regulator Components
 CUI_PJ-051AH
 
@@ -89025,6 +89102,20 @@ Integrated Circuit
 0
 7
 7
+SD V2 Voltage Regulator Components
+SOT229P700X180-4N
+
+
+0
+4
+4
+SD V2 Voltage Regulator Components
+STA_RMCF0805_STP
+
+RMCF0805ZT0R00 
+0
+2
+2
 Sensor
 ASAIR_AM2302_P2.54mm_Lead2.75mm_TabDown
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/AM2302.pdf
