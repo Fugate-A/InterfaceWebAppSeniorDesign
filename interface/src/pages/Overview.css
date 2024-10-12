@@ -1,0 +1,21 @@
+/* Overview.css */
+.layout-container {
+    position: relative;
+    width: 800px;  /* Adjust to fit your layout size */
+    height: 600px; /* Adjust to fit your layout size */
+    border: 1px solid black; /* Optional: to visualize the container */
+  }
+  
+  .chair {
+    width: 50px;
+    height: 50px;
+    background-color: lightblue;
+    border: 1px solid darkblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: darkblue;
+    transform-origin: center; /* Ensures the rotation happens around the center */
+  }
+  
