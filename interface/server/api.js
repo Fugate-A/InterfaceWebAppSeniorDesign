@@ -8,6 +8,7 @@ const ATTRACTIVE_CONSTANT = 1.0;  // Scaling factor for attractive force
 const REPULSIVE_CONSTANT = 100.0; // Scaling factor for repulsive force
 const REPULSIVE_THRESHOLD = 50;   // Distance threshold for repulsive force
 const MAX_STEP_SIZE = 10;         // Maximum movement step size for each iteration
+const ROTATION_STEP_SIZE = 5;     // Step size for rotation (in degrees)
 
 // Utility function to calculate Euclidean distance
 const calculateDistance = (pos1, pos2) => {
@@ -66,6 +67,15 @@ const limitStepSize = (force) => {
     };
   }
   return force;
+};
+
+// Function to calculate rotation step towards target rotation
+const calculateRotationStep = (currentRotation, targetRotation) => {
+  const rotationDiff = targetRotation - currentRotation;
+  if (Math.abs(rotationDiff) <= ROTATION_STEP_SIZE) {
+    return targetRotation; // Snap to target rotation if close enough
+  }
+  return currentRotation + Math.sign(rotationDiff) * ROTATION_STEP_SIZE;
 };
 
 // Save box configuration to MongoDB
@@ -168,39 +178,6 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   }
 });
 
-// Set Layout 1 and Layout 2 for movement
-router.post('/set-layouts', async (req, res) => {
-  const { layout1Id, layout2Id } = req.body;
-  console.log('Received request to set Layout 1 and Layout 2:', { layout1Id, layout2Id });
-
-  const client = getClient();
-
-  if (!client) {
-    return res.status(500).json({ error: 'Database not connected' });
-  }
-
-  try {
-    const db = client.db(process.env.LocalRoomName);
-    const configurations = db.collection('Configurations');
-
-    // Fetch both layouts
-    const layout1 = await configurations.findOne({ _id: new ObjectId(layout1Id) });
-    const layout2 = await configurations.findOne({ _id: new ObjectId(layout2Id) });
-
-    if (!layout1 || !layout2) {
-      return res.status(404).json({ error: 'One or both layouts not found' });
-    }
-
-    console.log('Both layouts fetched:', { layout1, layout2 });
-
-    // Return both layouts to the frontend
-    res.json({ layout1, layout2 });
-  } catch (error) {
-    console.error('Error setting layouts:', error);
-    res.status(500).json({ error: 'Failed to set layouts' });
-  }
-});
-
 // Simulate movement from Layout 1 to Layout 2 using Artificial Potential Fields
 router.post('/move-to-layout', (req, res) => {
   const { layout1Items, layout2Items, obstacles } = req.body;
@@ -212,13 +189,24 @@ router.post('/move-to-layout', (req, res) => {
     let currentPosition = { ...chair }; // Initialize with the current chair position
     const movementPath = [currentPosition]; // Keep track of the movement path
 
-    // Simulate movement until the chair reaches the target position
+    // Phase 1: Simulate movement to target x and y
     while (calculateDistance(currentPosition, targetPosition) > 1) { // Threshold for arrival
       const resultantForce = computeResultantForce(currentPosition, targetPosition, obstacles);
       const step = limitStepSize(resultantForce);
       currentPosition = {
         x: currentPosition.x + step.x,
         y: currentPosition.y + step.y,
+        rotation: currentPosition.rotation, // Keep rotation unchanged during this phase
+      };
+      movementPath.push(currentPosition); // Record the step
+    }
+
+    // Phase 2: Simulate rotation in place after reaching target x, y
+    while (currentPosition.rotation !== targetPosition.rotation) {
+      currentPosition = {
+        x: currentPosition.x, // Keep x and y unchanged
+        y: currentPosition.y,
+        rotation: calculateRotationStep(currentPosition.rotation, targetPosition.rotation), // Rotate chair in place
       };
       movementPath.push(currentPosition); // Record the step
     }

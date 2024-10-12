@@ -134,13 +134,13 @@ const Recon = () => {
     return {
       x: Math.min(Math.max(position.x, 0), viewportWidth - 50), // Keep within viewport width, assuming chair size is 50px
       y: Math.min(Math.max(position.y, 0), viewportHeight - 50), // Keep within viewport height, assuming chair size is 50px
-      rotation: position.rotation || 0,
+      rotation: position.rotation || 0, // Ensure the rotation is respected
     };
   };
 
   // Function to check if all chairs have reached their final position
   const checkIfAllChairsAtFinalPosition = () => {
-    if (currentPositions.every((pos, index) => calculateDistance(pos, desiredLayout.items[index]) < 1)) {
+    if (currentPositions.every((pos, index) => calculateDistance(pos, desiredLayout.items[index]) < 1 && pos.rotation === desiredLayout.items[index].rotation)) {
       setAtFinalLayout(true); // Mark as at final layout when all chairs have reached their target
       setReconFinished(true); // Mark reconfiguration as finished
       console.log("Reconfiguration complete.");
