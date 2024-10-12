@@ -4,6 +4,7 @@ import Button from './components/ButtonExample';
 import Overview from './pages/Overview';
 import CreateLayout from './pages/CreateLayoutPage';
 import LoadLayout from './pages/LayoutListPage'; 
+import Recon from './pages/Recon'; // Import the new Recon component
 
 function App() {
   const navigate = useNavigate();
@@ -20,6 +21,10 @@ function App() {
     navigate('/load-layout');
   };
 
+  const handleNavigateToRecon = () => {
+    navigate('/recon'); // Navigate to Recon page
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -27,20 +32,24 @@ function App() {
         <Button /> 
         <h2>Welcome to the Home Page!</h2>
         <p>Click the button below to navigate to different pages.</p>
-        <button onClick={handleNavigateToOverview}>Go to Overview</button> {/* Navigate button to Overview */}
-        <button onClick={handleNavigateToCreateLayout}>Create New Layout</button> {/* Navigate button to CreateLayout */}
-        <button onClick={handleNavigateToLoadLayout}>Load Existing Layout</button> {/* Navigate button to LoadLayout */}
+        <button onClick={handleNavigateToOverview}>Go to Overview</button>
+        <button onClick={handleNavigateToCreateLayout}>Create New Layout</button>
+        <button onClick={handleNavigateToLoadLayout}>Load Existing Layout</button>
+        <button onClick={handleNavigateToRecon}>Go to Recon</button> {/* Button to navigate to Recon */}
       </header>
       <nav>
         <ul>
           <li>
-            <Link to="/overview"></Link> {/* Link to Overview */}
+            <Link to="/overview">Overview</Link>
           </li>
           <li>
-            <Link to="/create-layout"></Link> {/* Link to CreateLayout */}
+            <Link to="/create-layout">Create Layout</Link>
           </li>
           <li>
-            <Link to="/load-layout"></Link> {/* Link to LoadLayout */}
+            <Link to="/load-layout">Load Layout</Link>
+          </li>
+          <li>
+            <Link to="/recon">Recon</Link> {/* Link to Recon */}
           </li>
         </ul>
       </nav>
@@ -53,10 +62,11 @@ function Main() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<App />} /> {/* Set App as Home */}
-        <Route path="/overview" element={<Overview />} /> {/* Overview Route */}
-        <Route path="/create-layout" element={<CreateLayout />} /> {/* CreateLayout Route */}
-        <Route path="/load-layout" element={<LoadLayout />} /> {/* LoadLayout Route */}
+        <Route path="/" element={<App />} />
+        <Route path="/overview" element={<Overview />} />
+        <Route path="/create-layout" element={<CreateLayout />} />
+        <Route path="/load-layout" element={<LoadLayout />} />
+        <Route path="/recon" element={<Recon />} /> {/* Route for Recon */}
       </Routes>
     </Router>
   );
