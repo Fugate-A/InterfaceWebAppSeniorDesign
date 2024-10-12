@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import Button from './components/ButtonExample'; // Import ButtonExample from components
-import Overview from './pages/Overview'; // Import Overview from pages
-import CreateLayout from './pages/CreateLayoutPage'; // Import CreateLayout from pages
-import LoadLayout from './pages/LayoutListPage'; // Import LoadLayout from pages
+import Button from './components/ButtonExample'; 
+import Overview from './pages/Overview';
+import CreateLayout from './pages/CreateLayoutPage';
+import LoadLayout from './pages/LayoutListPage'; 
 
 function App() {
   const navigate = useNavigate();

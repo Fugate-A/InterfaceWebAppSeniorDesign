@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import LayoutDetailsModal from '../components/LayoutDetailsModal';
+import './Overview.css'; // Make sure you have some basic styles for the chairs
 
 const Overview = () => {
   const [layouts, setLayouts] = useState([]);
-  const [selectedLayout, setSelectedLayout] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedLayout, setSelectedLayout] = useState(null); // Will hold the selected layout's details
   const [errorMessage, setErrorMessage] = useState('');
 
   // Function to fetch all layouts
@@ -24,6 +23,7 @@ const Overview = () => {
     fetchLayouts();
   }, []);
 
+  // Handle selecting a layout
   const handleLayoutSelection = async (event) => {
     const layoutId = event.target.value;
     if (layoutId) {
@@ -33,8 +33,8 @@ const Overview = () => {
           throw new Error('Network response was not ok');
         }
         const layout = await response.json();
-        setSelectedLayout(layout);
-        setIsModalOpen(true);
+        console.log("Selected Layout Data:", layout); // Log layout data to check the structure
+        setSelectedLayout(layout); // Set the selected layout data
         setErrorMessage(''); // Clear any previous error message
       } catch (error) {
         console.error('Error loading layout details:', error);
@@ -43,15 +43,11 @@ const Overview = () => {
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedLayout(null);
-  };
-
   return (
     <div>
       <h1>Layout Overview</h1>
 
+      {/* Display error message if any */}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
       <label htmlFor="layout-select">Choose a layout:</label>
@@ -64,8 +60,32 @@ const Overview = () => {
         ))}
       </select>
 
-      {isModalOpen && selectedLayout && (
-        <LayoutDetailsModal layout={selectedLayout} onClose={closeModal} />
+      {/* Display the selected layout and render the chairs */}
+      {selectedLayout && (
+        <div>
+          <h2>{selectedLayout.layoutName || 'Untitled Layout'}</h2>
+          <p>Layout ID: {selectedLayout._id}</p>
+
+          {/* Render the chair elements */}
+          <div className="layout-container">
+            {Array.isArray(selectedLayout.items) && selectedLayout.items.length > 0 ? (
+              selectedLayout.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="chair"
+                  style={{
+                    transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation}deg)`,
+                    position: 'absolute', // Important for positioning the chairs
+                  }}
+                >
+                  Chair {index + 1}
+                </div>
+              ))
+            ) : (
+              <p>No chairs available for this layout.</p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
