@@ -1,0 +1,113 @@
+/* App.css */
+
+/* Global reset for margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body style that fills the entire screen */
+body, html {
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+/* Full app container to fill the whole page */
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* The header is now sticky at the top and spans the full width */
+.App-header {
+  background-color: #6200ea;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.App-header p {
+  margin-top: 5px;
+  font-size: 1.2rem;
+}
+
+/* The container below the header now takes up the rest of the screen */
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Styling for buttons, now filling more space */
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+.main-button {
+  background-color: #6200ea;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  margin: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  flex: 1;
+  max-width: 200px;
+  text-align: center;
+}
+
+.main-button:hover {
+  background-color: #3700b3;
+}
+
+/* Navigation styles for the links */
+.App-nav {
+  background-color: #3700b3;
+  padding: 10px;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.App-nav ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.App-nav ul li {
+  margin: 0 15px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #c3cfe2;
+}
