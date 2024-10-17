@@ -3,12 +3,13 @@ const { ObjectId } = require('mongodb'); // Import ObjectId for MongoDB operatio
 const router = express.Router();
 const { getClient } = require('./server'); // Import the MongoDB client
 
-// Constants for APF
+// Constants for APF and Collision Avoidance
 const ATTRACTIVE_CONSTANT = 1.0;  // Scaling factor for attractive force
 const REPULSIVE_CONSTANT = 100.0; // Scaling factor for repulsive force
 const REPULSIVE_THRESHOLD = 50;   // Distance threshold for repulsive force
 const MAX_STEP_SIZE = 10;         // Maximum movement step size for each iteration
 const ROTATION_STEP_SIZE = 5;     // Step size for rotation (in degrees)
+const MIN_DISTANCE = 50;          // Minimum distance between chairs for collision avoidance
 
 // Utility function to calculate Euclidean distance
 const calculateDistance = (pos1, pos2) => {
@@ -29,7 +30,7 @@ const computeAttractiveForce = (currentPosition, targetPosition) => {
   };
 };
 
-// Function to compute repulsive force from obstacles
+// Function to compute repulsive force from obstacles (including other chairs)
 const computeRepulsiveForce = (currentPosition, obstacles) => {
   let totalForce = { x: 0, y: 0 };
   obstacles.forEach((obstacle) => {
@@ -76,6 +77,27 @@ const calculateRotationStep = (currentRotation, targetRotation) => {
     return targetRotation; // Snap to target rotation if close enough
   }
   return currentRotation + Math.sign(rotationDiff) * ROTATION_STEP_SIZE;
+};
+
+// Function to check for collision between two chairs
+const isCollision = (chair1, chair2) => {
+  return calculateDistance(chair1, chair2) < MIN_DISTANCE;
+};
+
+// Function to resolve collisions by stopping higher-numbered chairs if necessary
+const resolveCollisions = (chairs, currentPositions) => {
+  for (let i = 0; i < chairs.length; i++) {
+    const chair = currentPositions[i];
+    for (let j = 0; j < i; j++) {
+      const otherChair = currentPositions[j];
+      if (isCollision(chair, otherChair)) {
+        // Chair i yields to Chair j
+        console.log(`Collision detected between Chair ${i + 1} and Chair ${j + 1}. Chair ${i + 1} yields.`);
+        return true; // Collision detected, Chair i should wait
+      }
+    }
+  }
+  return false; // No collision detected
 };
 
 // Save box configuration to MongoDB
@@ -136,7 +158,7 @@ router.get('/load-layouts', async (req, res) => {
     res.json({ layouts });
   } catch (error) {
     console.error('Error loading layouts:', error);
-    res.status(500).json({ message: 'Failed to load layouts.' });
+    res.status500.json({ message: 'Failed to load layouts.' });
   }
 });
 
@@ -178,12 +200,13 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   }
 });
 
-// Simulate movement from Layout 1 to Layout 2 using Artificial Potential Fields
+// Simulate movement with collision avoidance
 router.post('/move-to-layout', (req, res) => {
   const { layout1Items, layout2Items, obstacles } = req.body;
 
-  console.log('Simulating movement from Layout 1 to Layout 2 using APF');
+  console.log('Simulating movement from Layout 1 to Layout 2 using APF with collision avoidance');
 
+  let currentPositions = [...layout1Items];
   const movements = layout1Items.map((chair, index) => {
     const targetPosition = layout2Items[index];
     let currentPosition = { ...chair }; // Initialize with the current chair position
@@ -191,14 +214,20 @@ router.post('/move-to-layout', (req, res) => {
 
     // Phase 1: Simulate movement to target x and y
     while (calculateDistance(currentPosition, targetPosition) > 1) { // Threshold for arrival
-      const resultantForce = computeResultantForce(currentPosition, targetPosition, obstacles);
+      const otherChairs = currentPositions.filter((_, i) => i !== index);
+      const resultantForce = computeResultantForce(currentPosition, targetPosition, obstacles.concat(otherChairs));
       const step = limitStepSize(resultantForce);
       currentPosition = {
         x: currentPosition.x + step.x,
         y: currentPosition.y + step.y,
         rotation: currentPosition.rotation, // Keep rotation unchanged during this phase
       };
-      movementPath.push(currentPosition); // Record the step
+
+      // Check for collisions and resolve by yielding priority
+      if (!resolveCollisions(layout1Items, currentPositions)) {
+        movementPath.push(currentPosition); // Move only if no collisions
+        currentPositions[index] = currentPosition; // Update current position
+      }
     }
 
     // Phase 2: Simulate rotation in place after reaching target x, y
@@ -218,9 +247,15 @@ router.post('/move-to-layout', (req, res) => {
   });
 
   res.json({
-    message: 'Movement simulation completed using Artificial Potential Fields.',
+    message: 'Movement simulation completed using Artificial Potential Fields with collision avoidance.',
     movements,
   });
+});
+
+// Example GET request for testing purposes
+router.get('/example', (req, res) => {
+  console.log('Received GET request to /api/example');
+  res.json({ message: 'Hello from the backend API!' });
 });
 
 module.exports = router;
