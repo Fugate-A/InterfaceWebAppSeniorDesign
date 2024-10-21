@@ -2,12 +2,13 @@
 #include <WebSocketsClient.h>
 
 // Replace these with your network credentials
-const char* ssid     = "Hello There";     // Your WiFi SSID
-const char* password = "General Kenobi"; // Your WiFi Password
+const char* ssid     = "Your_SSID";     
+const char* password = "Your_PASSWORD";
 
-// WebSocket server details (replace with your MERN stack server address and port)
-const char* websockets_server_host = "your-server-ip-or-domain";  // e.g., 192.168.1.100 or your server domain
-const uint16_t websockets_server_port = 8080; // Replace with the port you're using for WebSocket communication
+// WebSocket server details
+const char* websockets_server_host = "your-server-ip";  // Replace with your server IP or domain
+const uint16_t websockets_server_port = 8081;           // Replace with the WebSocket server port
+const char* websockets_server_path = "/";               // If using a specific WebSocket path, update it here
 
 WebSocketsClient webSocket;
 
@@ -17,32 +18,19 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.println("WebSocket Disconnected");
       break;
     case WStype_CONNECTED:
-      Serial.println("WebSocket Connected to server");
-      // Send a message to the server after connection
-      webSocket.sendTXT("Hello from ESP32");
+      Serial.println("WebSocket Connected");
+      // Send identifier to the server when connected
+      webSocket.sendTXT("ESP32_CONNECTED");
       break;
     case WStype_TEXT:
-      // Handle incoming message
+      // Handle incoming message from the server
       Serial.printf("Received from server: %s\n", payload);
-
-      // For example, echo the message back to the server
-      webSocket.sendTXT("ESP32 received: " + String((char*)payload));
-      break;
-    case WStype_BIN:
-      Serial.println("Received binary data");
-      break;
-    case WStype_PING:
-      Serial.println("Received ping");
-      break;
-    case WStype_PONG:
-      Serial.println("Received pong");
       break;
   }
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
 
   // Connect to WiFi
   WiFi.begin(ssid, password);
@@ -51,20 +39,13 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("\nConnected to WiFi");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-
+  
   // Connect to WebSocket server
-  webSocket.begin(websockets_server_host, websockets_server_port, "/ws"); // Replace "/ws" with your WebSocket endpoint
-
-  // Assign WebSocket event handler
+  webSocket.begin(websockets_server_host, websockets_server_port, websockets_server_path);
   webSocket.onEvent(webSocketEvent);
-
-  // Optionally set WebSocket heartbeats for stability
-  webSocket.enableHeartbeat(30000, 10000, 2);
 }
 
 void loop() {
-  // Maintain WebSocket connection
+  // Keep WebSocket connection alive
   webSocket.loop();
 }

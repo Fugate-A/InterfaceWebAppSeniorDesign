@@ -1,7 +1,9 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config(); 
+const express = require('express');
+const app = express();
 
-let client; //let allows the mongo connection to be maintained whule server is running
+let client; //let allows the mongo connection to be maintained while the server is running
 
 const connectToDatabase = async () => {
   try {
@@ -38,4 +40,9 @@ const getClient = () => {
   return client; // Return the MongoClient instance
 };
 
+// Import and initialize WebSocket logic from socket.js
+const initializeWebSocket = require('./socket');
+initializeWebSocket(app); // Pass the Express app to WebSocket initialization
+
+// Export MongoDB connection functions
 module.exports = { connectToDatabase, getClient };

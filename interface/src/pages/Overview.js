@@ -1,12 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import './Overview.css'; // Make sure you have some basic styles for the chairs
+import './Overview.css'; 
+import io from 'socket.io-client'; // Import Socket.IO client
+
+// Initialize WebSocket connection to the WebSocket server (use your WebSocket port, likely 8081)
+const socket = io(`${process.env.REACT_APP_SOCKET_URL || 'http://localhost:8081'}`); 
 
 const Overview = () => {
   const [layouts, setLayouts] = useState([]);
-  const [selectedLayout, setSelectedLayout] = useState(null); // Will hold the selected layout's details
+  const [selectedLayout, setSelectedLayout] = useState(null); 
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Function to fetch all layouts
+  useEffect(() => {
+    fetchLayouts();
+
+    // WebSocket event listeners
+    socket.on('message', (message) => {
+      console.log('Message from server:', message);
+    });
+
+    socket.on('esp-message', (message) => {
+      console.log('Message from ESP32:', message);
+      // Handle ESP32 messages if needed
+    });
+
+    // Clean up the socket connection when the component unmounts
+    return () => {
+      socket.off('message');
+      socket.off('esp-message');
+    };
+  }, []);
+
   const fetchLayouts = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/load-layouts`);
@@ -18,12 +41,6 @@ const Overview = () => {
     }
   };
 
-  // Load layouts on component mount
-  useEffect(() => {
-    fetchLayouts();
-  }, []);
-
-  // Handle selecting a layout
   const handleLayoutSelection = async (event) => {
     const layoutId = event.target.value;
     if (layoutId) {
@@ -33,14 +50,20 @@ const Overview = () => {
           throw new Error('Network response was not ok');
         }
         const layout = await response.json();
-        console.log("Selected Layout Data:", layout); // Log layout data to check the structure
-        setSelectedLayout(layout); // Set the selected layout data
-        setErrorMessage(''); // Clear any previous error message
+        console.log("Selected Layout Data:", layout);
+        setSelectedLayout(layout);
+        setErrorMessage('');
       } catch (error) {
         console.error('Error loading layout details:', error);
         setErrorMessage('Failed to load layout details. Please try again later.');
       }
     }
+  };
+
+  // Function to send a command to the ESP32
+  const sendCommandToESP = (command) => {
+    console.log('Sending command to ESP32:', command);
+    socket.emit('message', command); // Send the command to the WebSocket server
   };
 
   return (
@@ -75,7 +98,7 @@ const Overview = () => {
                   className="chair"
                   style={{
                     transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation}deg)`,
-                    position: 'absolute', // Important for positioning the chairs
+                    position: 'absolute',
                   }}
                 >
                   Chair {index + 1}
@@ -85,6 +108,9 @@ const Overview = () => {
               <p>No chairs available for this layout.</p>
             )}
           </div>
+
+          {/* Button to send command to ESP32 */}
+          <button onClick={() => sendCommandToESP('MOVE_CHAIRS')}>Send Command to ESP32</button>
         </div>
       )}
     </div>
