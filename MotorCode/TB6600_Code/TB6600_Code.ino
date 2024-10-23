@@ -31,7 +31,7 @@ void setup() {
 
 void loop() {
 
-  moveForward(400);
+  moveForward(4000);
 
   delay(1000);
 }
