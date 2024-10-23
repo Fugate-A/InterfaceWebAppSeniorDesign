@@ -1,6 +1,9 @@
 #include <WiFi.h>
 #include <WebSocketsClient.h>
 
+//look into dns server esp32 library
+//look into http client
+
 const char* ssid = "Hello There";     // Your WiFi SSID
 const char* password = "General Kenobi"; // Your WiFi Password
 
