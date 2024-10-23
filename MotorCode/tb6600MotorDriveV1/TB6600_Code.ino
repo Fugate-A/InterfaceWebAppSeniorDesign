@@ -1,15 +1,19 @@
-int PULFL = 3; //define Pulse pin
-int DIRFL = 1; //define Direction pin
-int ENAFL = 0; //define Enable Pin
+int PULFL = 16; //define Pulse pin
+int DIRFL = 2; //define Direction pin
+int ENAFL = 35; //define Enable Pin
+
 int PULRL = 5;
-int DIRRL = 4;
-int ENARL = 0;
-int PULFR = 17;
-int DIRFR = 16;
-int ENAFR = 0;
-int PULRR = 22;
-int DIRRR = 21;
-int ENARR = 0;
+int DIRRL = 17;
+int ENARL = 35;
+
+int PULFR = 22;
+int DIRFR = 21;
+int ENAFR = 35;
+
+int PULRR = 14;
+int DIRRR = 12;
+int ENARR = 35;
+
 void setup() {
   pinMode (PULFL, OUTPUT);
   pinMode (DIRFL, OUTPUT);
