@@ -1,5 +1,5 @@
 int PULFL = 16; //define Pulse pin
-int DIRFL = 2; //define Direction pin
+int DIRFL = 2;  //define Direction pin
 int ENAFL = 35; //define Enable Pin
 
 int PULRL = 5;
