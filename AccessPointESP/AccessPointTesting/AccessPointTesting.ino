@@ -43,24 +43,38 @@ void loop() {
   server.handleClient();  // Handle incoming HTTP requests
 }
 
-// Serve the HTML page with a button
+// Serve the HTML page with a button and WebSocket connection
 void handleRoot() {
   String html = "<html><body>";
-  html += "<h1>ESP32 Button Test</h1>";
-  html += "<button onclick=\"buttonClicked()\">Click Me!</button>";
+  html += "<h1>ESP32 Button and WebSocket Test</h1>";
+  
+  // Button to send WebSocket request
+  html += "<button onclick=\"sendWebSocketMessage()\">Click Me to Send WebSocket Message!</button>";
+  
+  // WebSocket JavaScript logic
   html += "<script>";
-  html += "function buttonClicked() {";
-  html += "  console.log('Button clicked! Sending request to ESP32...');";  // Log in the browser console
-  html += "  fetch('/button-click')";  // Send a request to the ESP32 when the button is clicked
+  html += "let socket;";
+  html += "window.onload = function() {";
+  html += "  socket = new WebSocket('ws://192.168.4.2:8081');";  // Replace with your WebSocket server's URL
+  html += "  socket.onopen = function() { console.log('WebSocket connection opened.'); };";
+  html += "  socket.onmessage = function(event) { console.log('Received from server: ' + event.data); };";
+  html += "  socket.onerror = function(error) { console.error('WebSocket Error: ' + error); };";
+  html += "};";
+  
+  // Function to send message via WebSocket when the button is clicked
+  html += "function sendWebSocketMessage() {";
+  html += "  console.log('Sending WebSocket message...');";
+  html += "  socket.send('Hello from ESP32 web page!');";  // Message sent to WebSocket server
   html += "}";
   html += "</script>";
+
   html += "</body></html>";
 
   server.send(200, "text/html", html);  // Send the HTML page
 }
 
-// Handle the button click and log it in the serial monitor
+// Handle the button click (HTTP request)
 void handleButtonClick() {
-  Serial.println("Button was clicked!");  // Log the event in the ESP32 serial monitor
-  server.send(200, "text/plain", "Button click logged!");  // Send a response back to the client
+  Serial.println("HTTP Button was clicked!");  // Log the event in the ESP32 serial monitor
+  server.send(200, "text/plain", "Button click logged via HTTP!");  // Send a response back to the client
 }
