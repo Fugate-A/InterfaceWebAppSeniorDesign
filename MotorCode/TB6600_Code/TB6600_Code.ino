@@ -33,7 +33,7 @@ void loop() {
 
   moveForward(4000);
 
-  delay(1000);
+  delay(1500);
 }
 
 
