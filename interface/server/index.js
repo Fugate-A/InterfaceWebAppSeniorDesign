@@ -6,7 +6,8 @@ const { connectToDatabase } = require('./server'); //require mongo connection
 
 const app = express();
 const port = 5000;
-const host = process.env.BackendHost //|| '0.0.0.0'; // Use 0.0.0.0 for network accessibility
+const host = process.env.BackendHost || 'localhost'; // Fallback to localhost
+//const host = process.env.BackendHost //|| '0.0.0.0'; // Use 0.0.0.0 for network accessibility
 
 app.use(cors()); // Allow all origins for now 
 app.use(express.json());
