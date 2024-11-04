@@ -39,11 +39,11 @@ void loop() {
 int convertInchToStep(int inches){
   //1 rotation of 97mm wheel is ~12 inches. 200 steps per rotation, 12/200 = 0.06 inches per step. ~17 steps per inch.
   int steps = inches * 17;
-  return steps
+  return steps;
 }
 
 int convertDegreesToSteps(int degrees){
-  int steps = degress * 17;
+  int steps = degrees * 17;
   return steps;
 }
 //FORWARD----------------------------------------------------------------------------------------------------------
