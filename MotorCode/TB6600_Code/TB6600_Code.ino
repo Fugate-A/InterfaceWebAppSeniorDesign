@@ -1,3 +1,7 @@
+// Include necessary libraries
+#include <esp_now.h>
+#include <WiFi.h>
+
 int PULFL = 16; //define Pulse pin
 int DIRFL = 2;  //define Direction pin
 int ENAFL = 35; //define Enable Pin
@@ -14,7 +18,22 @@ int PULRR = 14;
 int DIRRR = 12;
 int ENARR = 35;
 
+
+// Function prototypes for movement commands
+void moveForward(int inches);
+void moveBackward(int inches);
+void translateLeft(int inches);
+void translateRight(int inches);
+void rotateClockwise(int degrees);
+void rotateCounterClockwise(int degrees);
+
+// ESP-NOW callback for receiving commands
+void onDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len);
+
 void setup() {
+  Serial.begin(115200);
+
+  // Set up motor pins
   pinMode (PULFL, OUTPUT);
   pinMode (DIRFL, OUTPUT);
   pinMode (ENAFL, OUTPUT);
@@ -27,122 +46,60 @@ void setup() {
   pinMode (PULRR, OUTPUT);
   pinMode (DIRRR, OUTPUT);
   pinMode (ENARR, OUTPUT);
+
+  // Initialize WiFi and ESP-NOW
+  WiFi.mode(WIFI_STA);
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  esp_now_register_recv_cb(onDataRecv);
+}
+
+// ESP-NOW data receive callback
+void onDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len) {
+  String command = String((char*)incomingData).substring(0, len);
+  Serial.print("Received command: ");
+  Serial.println(command);
+
+  if (command == "moveForward") {
+    moveForward(12);  // Example to move forward 12 inches
+  } else if (command == "moveBackward") {
+    moveBackward(12);
+  } else if (command == "translateLeft") {
+    translateLeft(12);
+  } else if (command == "translateRight") {
+    translateRight(12);
+  } else if (command == "rotateClockwise") {
+    rotateClockwise(90);
+  } else if (command == "rotateCounterClockwise") {
+    rotateCounterClockwise(90);
+  }
 }
 
 void loop() {
-
-  moveForward(48);
-
-  delay(1500);
-} 
-
-int convertInchToStep(int inches){
-  //1 rotation of 97mm wheel is ~12 inches. 200 steps per rotation, 12/200 = 0.06 inches per step. ~17 steps per inch.
-  int steps = inches * 17;
-  return steps;
+  // No need for any code in loop()
 }
 
-int convertDegreesToSteps(int degrees){
-  int steps = degrees * 17;
-  return steps;
+// Utility functions for motor control
+int convertInchToStep(int inches) {
+  return inches * 17;  // Adjust for your wheel and stepper setup
 }
-//FORWARD----------------------------------------------------------------------------------------------------------
-void moveForward(int inches){
+
+int convertDegreesToSteps(int degrees) {
+  return degrees * 17;  // Adjust for your specific rotation and stepper setup
+}
+
+// FORWARD MOVEMENT
+void moveForward(int inches) {
   int steps = convertInchToStep(inches);
-  
+
   digitalWrite(DIRFL, LOW);
   digitalWrite(DIRRL, LOW);
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -155,103 +112,17 @@ void moveForward(int inches){
     delayMicroseconds(2500);
   }
 }
-//BACKWARD----------------------------------------------------------------------------------------------------------
-void moveBackward(int inches){
+
+// BACKWARD MOVEMENT
+void moveBackward(int inches) {
   int steps = convertInchToStep(inches);
-  
+
   digitalWrite(DIRFL, HIGH);
   digitalWrite(DIRRL, HIGH);
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, LOW);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -264,103 +135,17 @@ void moveBackward(int inches){
     delayMicroseconds(2500);
   }
 }
-//LEFT----------------------------------------------------------------------------------------------------------
-void translateLeft(int inches){
+
+// LEFT TRANSLATION
+void translateLeft(int inches) {
   int steps = convertInchToStep(inches);
-  
+
   digitalWrite(DIRFL, HIGH);
   digitalWrite(DIRRL, LOW);
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, LOW);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -373,103 +158,17 @@ void translateLeft(int inches){
     delayMicroseconds(2500);
   }
 }
-//RIGHT----------------------------------------------------------------------------------------------------------
-void translateRight(int inches){
+
+// RIGHT TRANSLATION
+void translateRight(int inches) {
   int steps = convertInchToStep(inches);
-  
+
   digitalWrite(DIRFL, LOW);
   digitalWrite(DIRRL, HIGH);
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -482,103 +181,17 @@ void translateRight(int inches){
     delayMicroseconds(2500);
   }
 }
-//ROTATION COUNTER-CLOCKWISE----------------------------------------------------------------------------------------------------------
-void rotateCounterClockwise(int degrees){
+
+// COUNTERCLOCKWISE ROTATION
+void rotateCounterClockwise(int degrees) {
   int steps = convertDegreesToSteps(degrees);
-  
+
   digitalWrite(DIRFL, HIGH);
   digitalWrite(DIRRL, HIGH);
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -592,103 +205,16 @@ void rotateCounterClockwise(int degrees){
   }
 }
 
-//ROTATION CLOCKWISE----------------------------------------------------------------------------------------------------------
-void rotateClockwise(int degrees){
+// CLOCKWISE ROTATION
+void rotateClockwise(int degrees) {
   int steps = convertDegreesToSteps(degrees);
-  
+
   digitalWrite(DIRFL, LOW);
   digitalWrite(DIRRL, LOW);
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, LOW);
 
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < steps + 2 - 170; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1700);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(1900);
-  }
-
-  for (int i = 0; i < 25; i++) // 1 rotation
-  {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2200);
-  }
-
-  for (int i = 0; i < 35; i++) // 1 rotation
-  {
+  for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
