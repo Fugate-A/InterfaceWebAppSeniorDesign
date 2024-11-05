@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsClient.h>
-#include <esp_now.h>
+#include <HTTPClient.h>
 
 // Access Point Credentials
 const char* apSsid = "ESP32-Access-Point";
@@ -12,47 +12,53 @@ IPAddress local_IP(192, 168, 4, 1);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// WebSocket client object
+// WebSocket client object to communicate with the server
 WebSocketsClient webSocket;
 
-// Motor Controller ESP32's MAC Address
-uint8_t motorControllerAddress[] = {0x0C, 0xB8, 0x15, 0x44, 0xF1, 0x00};
+// Motor Controller IP Address
+IPAddress motor_IP(192, 168, 4, 3); // IP of motor ESP32
 
 // Create a WebServer object on port 80
 WebServer server(80);
 
-// Function to send commands via ESP-NOW
-void sendMotorCommand(String command) {
-  esp_now_send(motorControllerAddress, (uint8_t *)command.c_str(), command.length());
+// Function to send command to the motor controller via HTTP
+void sendMotorCommand(const String& command) {
+  HTTPClient http;
+  http.begin("http://192.168.4.3/move");  // Motor controller endpoint
+
+  // Set content type to JSON and send command as JSON
+  http.addHeader("Content-Type", "application/json");
+  String payload = "{\"command\":\"" + command + "\"}";
+
+  int httpResponseCode = http.POST(payload);
+  if (httpResponseCode > 0) {
+    Serial.print("Motor HTTP Response code: ");
+    Serial.println(httpResponseCode);
+  } else {
+    Serial.print("Motor Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
 }
 
-// ESP-NOW send callback
-void onSend(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "ESP-NOW Send Success" : "ESP-NOW Send Failure");
-}
-
-// WebSocket message handler to send commands to the motor controller
+// WebSocket message handler to handle messages from the server and forward them to the motor ESP
 void handleWebSocketMessage(String message) {
   Serial.print("Received WebSocket message: ");
   Serial.println(message);
 
-  // Forward command to motor controller ESP32
+  // Forward command to the motor controller ESP32 via HTTP
   sendMotorCommand(message);
-
-  Serial.print("Sent move message to motor esp: ");
-  Serial.println(message);
-
 }
 
-// WebSocket event handler
+// WebSocket event handler to manage WebSocket events
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED:
-      Serial.println("WebSocket disconnected");
+      Serial.println("WebSocket disconnected from server");
       break;
     case WStype_CONNECTED:
-      Serial.println("WebSocket connected");
-      webSocket.sendTXT("ESP32 connected to WebSocket server");
+      Serial.println("WebSocket connected to server at 192.168.4.2");
+      webSocket.sendTXT("ESP32 Access Point connected to server");
       break;
     case WStype_TEXT:
       handleWebSocketMessage((char*)payload);
@@ -74,33 +80,16 @@ void setup() {
   Serial.print("Access Point IP address: ");
   Serial.println(WiFi.softAPIP());
 
-  // Initialize ESP-NOW and register send callback
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
-  esp_now_register_send_cb(onSend);
-
-  // Add the motor controller ESP32 as a peer
-  esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, motorControllerAddress, 6);
-  peerInfo.channel = 0;  
-  peerInfo.encrypt = false;
-  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-    Serial.println("Failed to add peer");
-    return;
-  }
-
-  // Connect to WebSocket server
-  webSocket.begin("192.168.4.2", 8081, "/");
-  webSocket.onEvent(webSocketEvent);
-  webSocket.setReconnectInterval(5000);
-
-  // Start HTTP server
+  // Start HTTP server for testing purposes
   server.on("/", []() {
-    server.send(200, "text/plain", "ESP32 WebSocket and ESP-NOW Access Point");
+    server.send(200, "text/plain", "ESP32 WebSocket Access Point");
   });
   server.begin();
+
+  // Connect to WebSocket server on 192.168.4.2
+  webSocket.begin("192.168.4.2", 8081, "/"); // Server IP address and port
+  webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
 }
 
 void loop() {

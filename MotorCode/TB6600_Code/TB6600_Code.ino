@@ -1,229 +1,124 @@
-// Include necessary libraries
-#include <esp_now.h>
 #include <WiFi.h>
+#include <WebServer.h>
 
-int PULFL = 16; //define Pulse pin
-int DIRFL = 2;  //define Direction pin
-int ENAFL = 35; //define Enable Pin
+// Motor Controller WiFi Credentials
+const char* ssid = "ESP32-Access-Point";
+const char* password = "123456789";
 
+const int enablePinOut = 15;
+
+// Motor Controller IP Configuration
+IPAddress local_IP(192, 168, 4, 3);
+IPAddress gateway(192, 168, 4, 1);
+IPAddress subnet(255, 255, 255, 0);
+
+// Motor control pins
+int PULFL = 16;  // Pulse pin for Front-Left motor
+int DIRFL = 2;   // Direction pin for Front-Left motor
+int ENAFL = enablePinOut;  // Enable pin for Front-Left motor
+
+// Define other pins as needed
 int PULRL = 5;
 int DIRRL = 17;
-int ENARL = 35;
+int ENARL = enablePinOut;
 
 int PULFR = 22;
 int DIRFR = 21;
-int ENAFR = 35;
+int ENAFR = enablePinOut;
 
 int PULRR = 14;
 int DIRRR = 12;
-int ENARR = 35;
+int ENARR = enablePinOut;
 
+// Web server on port 80
+WebServer server(80);
 
-// Function prototypes for movement commands
-void moveForward(int inches);
-void moveBackward(int inches);
-void translateLeft(int inches);
-void translateRight(int inches);
-void rotateClockwise(int degrees);
-void rotateCounterClockwise(int degrees);
+// Function to execute the move forward command
+void moveForward(int inches) {
+  Serial.print("Executing move forward for ");
+  Serial.print(inches);
+  Serial.println(" inches");
 
-// ESP-NOW callback for receiving commands
-void onDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len);
+  int steps = inches * 17;
+  digitalWrite(DIRFL, LOW);
+  digitalWrite(DIRRL, LOW);
+  digitalWrite(DIRFR, HIGH);
+  digitalWrite(DIRRR, HIGH);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(2500);
+  }
+}
+
+// Handle incoming HTTP requests
+void handleMoveRequest() {
+  if (server.hasArg("plain")) {
+    String command = server.arg("plain");
+    Serial.print("Received command: ");
+    Serial.println(command);
+
+    if (command == "{\"command\":\"moveForward\"}") {
+      moveForward(12);  // Execute move forward with example distance
+      server.send(200, "application/json", "{\"status\":\"success\"}");
+    } else {
+      Serial.println("Unknown command");
+      server.send(400, "application/json", "{\"error\":\"Unknown command\"}");
+    }
+  } else {
+    Serial.println("No command received");
+    server.send(400, "application/json", "{\"error\":\"No command received\"}");
+  }
+}
 
 void setup() {
   Serial.begin(115200);
 
-  // Set up motor pins
-  pinMode (PULFL, OUTPUT);
-  pinMode (DIRFL, OUTPUT);
-  pinMode (ENAFL, OUTPUT);
-  pinMode (PULRL, OUTPUT);
-  pinMode (DIRRL, OUTPUT);
-  pinMode (ENARL, OUTPUT);
-  pinMode (PULFR, OUTPUT);
-  pinMode (DIRFR, OUTPUT);
-  pinMode (ENAFR, OUTPUT);
-  pinMode (PULRR, OUTPUT);
-  pinMode (DIRRR, OUTPUT);
-  pinMode (ENARR, OUTPUT);
+  // Set up motor pins as outputs
+  pinMode(PULFL, OUTPUT);
+  pinMode(DIRFL, OUTPUT);
+  pinMode(ENAFL, OUTPUT);
 
-  // Initialize WiFi and ESP-NOW
-  WiFi.mode(WIFI_STA);
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
+  pinMode(PULRL, OUTPUT);
+  pinMode(DIRRL, OUTPUT);
+  pinMode(ENARL, OUTPUT);
+
+  pinMode(PULFR, OUTPUT);
+  pinMode(DIRFR, OUTPUT);
+  pinMode(ENAFR, OUTPUT);
+
+  pinMode(PULRR, OUTPUT);
+  pinMode(DIRRR, OUTPUT);
+  pinMode(ENARR, OUTPUT);
+
+  // Configure static IP for the motor ESP32
+  WiFi.config(local_IP, gateway, subnet);
+  WiFi.begin(ssid, password);
+
+  Serial.print("Connecting to ");
+  Serial.print(ssid);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
-  esp_now_register_recv_cb(onDataRecv);
-}
+  Serial.println(" connected!");
+  Serial.print("Motor ESP IP Address: ");
+  Serial.println(WiFi.localIP());
 
-// ESP-NOW data receive callback
-void onDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len) {
-  String command = String((char*)incomingData).substring(0, len);
-  Serial.print("Received command: ");
-  Serial.println(command);
-
-  if (command == "moveForward") {
-    moveForward(12);  // Example to move forward 12 inches
-  } else if (command == "moveBackward") {
-    moveBackward(12);
-  } else if (command == "translateLeft") {
-    translateLeft(12);
-  } else if (command == "translateRight") {
-    translateRight(12);
-  } else if (command == "rotateClockwise") {
-    rotateClockwise(90);
-  } else if (command == "rotateCounterClockwise") {
-    rotateCounterClockwise(90);
-  }
+  // Set up HTTP server routes
+  server.on("/move", HTTP_POST, handleMoveRequest);
+  server.begin();
+  Serial.println("HTTP server started, waiting for commands...");
 }
 
 void loop() {
-  // No need for any code in loop()
-}
-
-// Utility functions for motor control
-int convertInchToStep(int inches) {
-  return inches * 17;  // Adjust for your wheel and stepper setup
-}
-
-int convertDegreesToSteps(int degrees) {
-  return degrees * 17;  // Adjust for your specific rotation and stepper setup
-}
-
-// FORWARD MOVEMENT
-void moveForward(int inches) {
-  int steps = convertInchToStep(inches);
-
-  digitalWrite(DIRFL, LOW);
-  digitalWrite(DIRRL, LOW);
-  digitalWrite(DIRFR, HIGH);
-  digitalWrite(DIRRR, HIGH);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-}
-
-// BACKWARD MOVEMENT
-void moveBackward(int inches) {
-  int steps = convertInchToStep(inches);
-
-  digitalWrite(DIRFL, HIGH);
-  digitalWrite(DIRRL, HIGH);
-  digitalWrite(DIRFR, LOW);
-  digitalWrite(DIRRR, LOW);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-}
-
-// LEFT TRANSLATION
-void translateLeft(int inches) {
-  int steps = convertInchToStep(inches);
-
-  digitalWrite(DIRFL, HIGH);
-  digitalWrite(DIRRL, LOW);
-  digitalWrite(DIRFR, HIGH);
-  digitalWrite(DIRRR, LOW);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-}
-
-// RIGHT TRANSLATION
-void translateRight(int inches) {
-  int steps = convertInchToStep(inches);
-
-  digitalWrite(DIRFL, LOW);
-  digitalWrite(DIRRL, HIGH);
-  digitalWrite(DIRFR, LOW);
-  digitalWrite(DIRRR, HIGH);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-}
-
-// COUNTERCLOCKWISE ROTATION
-void rotateCounterClockwise(int degrees) {
-  int steps = convertDegreesToSteps(degrees);
-
-  digitalWrite(DIRFL, HIGH);
-  digitalWrite(DIRRL, HIGH);
-  digitalWrite(DIRFR, HIGH);
-  digitalWrite(DIRRR, HIGH);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
-}
-
-// CLOCKWISE ROTATION
-void rotateClockwise(int degrees) {
-  int steps = convertDegreesToSteps(degrees);
-
-  digitalWrite(DIRFL, LOW);
-  digitalWrite(DIRRL, LOW);
-  digitalWrite(DIRFR, LOW);
-  digitalWrite(DIRRR, LOW);
-
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(PULFL, HIGH);
-    digitalWrite(PULRL, HIGH);
-    digitalWrite(PULFR, HIGH);
-    digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
-    digitalWrite(PULFL, LOW);
-    digitalWrite(PULRL, LOW);
-    digitalWrite(PULFR, LOW);
-    digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
-  }
+  server.handleClient();
 }
