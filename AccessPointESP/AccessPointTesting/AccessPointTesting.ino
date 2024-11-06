@@ -22,13 +22,13 @@ IPAddress motor_IP(192, 168, 4, 3); // IP of motor ESP32
 WebServer server(80);
 
 // Function to send command to the motor controller via HTTP
-void sendMotorCommand(const String& command) {
+void sendMotorCommand(const String& command, int value) {
   HTTPClient http;
   http.begin("http://192.168.4.3/move");  // Motor controller endpoint
 
-  // Set content type to JSON and send command as JSON
+  // Create JSON payload with command and value
   http.addHeader("Content-Type", "application/json");
-  String payload = "{\"command\":\"" + command + "\"}";
+  String payload = "{\"command\":\"" + command + "\", \"value\":" + String(value) + "}";
 
   int httpResponseCode = http.POST(payload);
   if (httpResponseCode > 0) {
@@ -46,8 +46,13 @@ void handleWebSocketMessage(String message) {
   Serial.print("Received WebSocket message: ");
   Serial.println(message);
 
-  // Forward command to the motor controller ESP32 via HTTP
-  sendMotorCommand(message);
+  // Parse command and value
+  int spaceIndex = message.indexOf(' ');
+  String command = message.substring(0, spaceIndex);
+  int value = message.substring(spaceIndex + 1).toInt();
+
+  // Forward command and value to the motor controller ESP32 via HTTP
+  sendMotorCommand(command, value);
 }
 
 // WebSocket event handler to manage WebSocket events

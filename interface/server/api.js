@@ -215,17 +215,20 @@ router.post('/move-to-layout', (req, res) => {
   });
 });
 
-// New endpoint to send commands to ESP32 via WebSocket
+// New endpoint to send commands with variable values to ESP32 via WebSocket
 router.post('/send-command', (req, res) => {
-  const { command } = req.body;
+  const { command, value } = req.body;
 
   if (!command) {
     return res.status(400).json({ error: 'No command provided' });
   }
 
-  sendCommandToESP32(command); // Send the command to ESP32
-  console.log(`Command sent to ESP32: ${command}`);
-  res.json({ message: `Command '${command}' sent to ESP32.` });
+  // Construct the command string with the value if provided
+  const fullCommand = value !== undefined ? `${command} ${value}` : command;
+
+  sendCommandToESP32(fullCommand); // Send the command to ESP32
+  console.log(`Command sent to ESP32: ${fullCommand}`);
+  res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
 
 module.exports = router;

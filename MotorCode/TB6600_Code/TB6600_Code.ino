@@ -17,7 +17,6 @@ int PULFL = 16;  // Pulse pin for Front-Left motor
 int DIRFL = 2;   // Direction pin for Front-Left motor
 int ENAFL = enablePinOut;  // Enable pin for Front-Left motor
 
-// Define other pins as needed
 int PULRL = 5;
 int DIRRL = 17;
 int ENARL = enablePinOut;
@@ -33,15 +32,147 @@ int ENARR = enablePinOut;
 // Web server on port 80
 WebServer server(80);
 
-// Function to execute the move forward command
+// Convert inches or degrees to steps for the motors
+int convertToSteps(int units) {
+  return units * 17;  // Adjust the conversion factor as needed
+}
+
+// Motor movement functions
 void moveForward(int inches) {
-  Serial.print("Executing move forward for ");
+  int steps = convertToSteps(inches);
+  Serial.print("Moving forward for ");
   Serial.print(inches);
   Serial.println(" inches");
 
-  int steps = inches * 17;
   digitalWrite(DIRFL, LOW);
   digitalWrite(DIRRL, LOW);
+  digitalWrite(DIRFR, HIGH);
+  digitalWrite(DIRRR, HIGH);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(3000);
+    //delayMicroseconds(2500);
+  }
+}
+
+void moveBackward(int inches) {
+  int steps = convertToSteps(inches);
+  Serial.print("Moving backward for ");
+  Serial.print(inches);
+  Serial.println(" inches");
+
+  digitalWrite(DIRFL, HIGH);
+  digitalWrite(DIRRL, HIGH);
+  digitalWrite(DIRFR, LOW);
+  digitalWrite(DIRRR, LOW);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(2500);
+  }
+}
+
+void translateLeft(int inches) {
+  int steps = convertToSteps(inches);
+  Serial.print("Translating left for ");
+  Serial.print(inches);
+  Serial.println(" inches");
+
+  digitalWrite(DIRFL, HIGH);
+  digitalWrite(DIRRL, LOW);
+  digitalWrite(DIRFR, HIGH);
+  digitalWrite(DIRRR, LOW);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(2500);
+  }
+}
+
+void translateRight(int inches) {
+  int steps = convertToSteps(inches);
+  Serial.print("Translating right for ");
+  Serial.print(inches);
+  Serial.println(" inches");
+
+  digitalWrite(DIRFL, LOW);
+  digitalWrite(DIRRL, HIGH);
+  digitalWrite(DIRFR, LOW);
+  digitalWrite(DIRRR, HIGH);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(3000);
+    //delayMicroseconds(2500);
+  }
+}
+
+void rotateClockwise(int degrees) {
+  int steps = convertToSteps(degrees);
+  Serial.print("Rotating clockwise for ");
+  Serial.print(degrees);
+  Serial.println(" degrees");
+
+  digitalWrite(DIRFL, LOW);
+  digitalWrite(DIRRL, LOW);
+  digitalWrite(DIRFR, LOW);
+  digitalWrite(DIRRR, LOW);
+
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(2500);
+  }
+}
+
+void rotateCounterClockwise(int degrees) {
+  int steps = convertToSteps(degrees);
+  Serial.print("Rotating counter-clockwise for ");
+  Serial.print(degrees);
+  Serial.println(" degrees");
+
+  digitalWrite(DIRFL, HIGH);
+  digitalWrite(DIRRL, HIGH);
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
@@ -59,25 +190,54 @@ void moveForward(int inches) {
   }
 }
 
-// Handle incoming HTTP requests
+#include <ArduinoJson.h> // Ensure you have the ArduinoJson library installed
+
+// Handle incoming HTTP requests with JSON parsing
 void handleMoveRequest() {
   if (server.hasArg("plain")) {
     String command = server.arg("plain");
     Serial.print("Received command: ");
     Serial.println(command);
 
-    if (command == "{\"command\":\"moveForward\"}") {
-      moveForward(12);  // Execute move forward with example distance
-      server.send(200, "application/json", "{\"status\":\"success\"}");
+    // Parse JSON command
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, command);
+    if (error) {
+      Serial.print("JSON parse error: ");
+      Serial.println(error.c_str());
+      server.send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
+      return;
+    }
+
+    // Extract command and value from JSON
+    String action = doc["command"];
+    int value = doc["value"];
+
+    // Execute the appropriate function based on the command
+    if (action == "moveForward") {
+      moveForward(value);
+    } else if (action == "moveBackward") {
+      moveBackward(value);
+    } else if (action == "translateLeft") {
+      translateLeft(value);
+    } else if (action == "translateRight") {
+      translateRight(value);
+    } else if (action == "rotateClockwise") {
+      rotateClockwise(value);
+    } else if (action == "rotateCounterClockwise") {
+      rotateCounterClockwise(value);
     } else {
       Serial.println("Unknown command");
       server.send(400, "application/json", "{\"error\":\"Unknown command\"}");
+      return;
     }
+    server.send(200, "application/json", "{\"status\":\"success\"}");
   } else {
     Serial.println("No command received");
     server.send(400, "application/json", "{\"error\":\"No command received\"}");
   }
 }
+
 
 void setup() {
   Serial.begin(115200);
