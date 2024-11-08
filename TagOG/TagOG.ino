@@ -13,9 +13,13 @@
 #define PIN_RST 27
 #define PIN_IRQ 34
 
-const char *ssid = "SpectrumSetup-D1";
-const char *password = "ablestudy738";
-const char *host = "192.168.1.10";
+// const char *ssid = "SpectrumSetup-D1";
+// const char *password = "ablestudy738";
+// const char *host = "192.168.1.10";
+
+const char *ssid = "ChairGuru";
+const char *password = "123456789";
+const char *host = "192.168.4.1";
 WiFiClient client;
 WebServer server(80); //http server on port 80
 
