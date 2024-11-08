@@ -1,9 +1,9 @@
 const express = require('express');
 const { ObjectId } = require('mongodb'); // Import ObjectId for MongoDB operations
 const router = express.Router();
-const { getClient } = require('./server'); // Import the MongoDB client
+const { getClient, sendCommandToESP32 } = require('./server'); // Import MongoDB client and WebSocket command function
 
-// Constants for APF
+// Constants for Artificial Potential Fields (APF)
 const ATTRACTIVE_CONSTANT = 1.0;  // Scaling factor for attractive force
 const REPULSIVE_CONSTANT = 100.0; // Scaling factor for repulsive force
 const REPULSIVE_THRESHOLD = 50;   // Distance threshold for repulsive force
@@ -73,7 +73,7 @@ const limitStepSize = (force) => {
 const calculateRotationStep = (currentRotation, targetRotation) => {
   const rotationDiff = targetRotation - currentRotation;
   if (Math.abs(rotationDiff) <= ROTATION_STEP_SIZE) {
-    return targetRotation; // Snap to target rotation if close enough
+    return targetRotation;
   }
   return currentRotation + Math.sign(rotationDiff) * ROTATION_STEP_SIZE;
 };
@@ -83,7 +83,7 @@ router.post('/save-configuration', async (req, res) => {
   const { layoutName, items } = req.body;
   console.log('Received request to save configuration:', { layoutName, items });
 
-  const client = getClient(); // Get the MongoDB client instance
+  const client = getClient();
 
   if (!client) {
     console.error('Database client is not connected.');
@@ -96,10 +96,8 @@ router.post('/save-configuration', async (req, res) => {
   }
 
   try {
-    const db = client.db(process.env.LocalRoomName); // Access the MongoDB database
-    const configurationCollection = db.collection('Configurations'); // Access the configurations collection
-
-    // Insert the layout configuration into MongoDB
+    const db = client.db(process.env.LocalRoomName);
+    const configurationCollection = db.collection('Configurations');
     const result = await configurationCollection.insertOne({ layoutName, items });
 
     if (result.acknowledged) {
@@ -118,7 +116,7 @@ router.post('/save-configuration', async (req, res) => {
 router.get('/load-layouts', async (req, res) => {
   console.log('Received request to load layouts');
 
-  const client = getClient(); // Get the MongoDB client instance
+  const client = getClient();
 
   if (!client) {
     console.error('Database client is not connected.');
@@ -126,10 +124,8 @@ router.get('/load-layouts', async (req, res) => {
   }
 
   try {
-    const db = client.db(process.env.LocalRoomName); // Access the MongoDB database
-    const layoutsCollection = db.collection('Configurations'); // Access the collection
-
-    // Fetch all layouts, project only the relevant fields (layoutName and items)
+    const db = client.db(process.env.LocalRoomName);
+    const layoutsCollection = db.collection('Configurations');
     const layouts = await layoutsCollection.find({}, { projection: { layoutName: 1, items: 1 } }).toArray();
 
     console.log('Layouts loaded:', layouts);
@@ -145,7 +141,7 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   const { layoutId } = req.params;
   console.log('Received request to load configuration for layoutId:', layoutId);
 
-  const client = getClient(); // Get the MongoDB client instance
+  const client = getClient();
 
   if (!client) {
     console.error('Database client is not connected.');
@@ -153,21 +149,19 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   }
 
   try {
-    const db = client.db(process.env.LocalRoomName); // Access the MongoDB database
-    const layoutsCollection = db.collection('Configurations'); // Access the collection
+    const db = client.db(process.env.LocalRoomName);
+    const layoutsCollection = db.collection('Configurations');
 
-    // Check if the layoutId is a valid MongoDB ObjectId
     if (!ObjectId.isValid(layoutId)) {
       console.error('Invalid ObjectId format:', layoutId);
       return res.status(400).json({ error: 'Invalid layoutId format' });
     }
 
-    // Fetch the specific layout by its ID
     const layout = await layoutsCollection.findOne({ _id: new ObjectId(layoutId) });
 
     if (layout) {
       console.log('Layout found:', layout);
-      res.json({ items: layout.items || [] }); // Ensure items is at least an empty array
+      res.json({ items: layout.items || [] });
     } else {
       console.error('Layout not found for layoutId:', layoutId);
       res.status(404).json({ error: 'Layout not found' });
@@ -178,7 +172,7 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   }
 });
 
-// Simulate movement from Layout 1 to Layout 2 using Artificial Potential Fields
+// Simulate movement from Layout 1 to Layout 2 using APF
 router.post('/move-to-layout', (req, res) => {
   const { layout1Items, layout2Items, obstacles } = req.body;
 
@@ -186,29 +180,27 @@ router.post('/move-to-layout', (req, res) => {
 
   const movements = layout1Items.map((chair, index) => {
     const targetPosition = layout2Items[index];
-    let currentPosition = { ...chair }; // Initialize with the current chair position
-    const movementPath = [currentPosition]; // Keep track of the movement path
+    let currentPosition = { ...chair };
+    const movementPath = [currentPosition];
 
-    // Phase 1: Simulate movement to target x and y
-    while (calculateDistance(currentPosition, targetPosition) > 1) { // Threshold for arrival
+    while (calculateDistance(currentPosition, targetPosition) > 1) {
       const resultantForce = computeResultantForce(currentPosition, targetPosition, obstacles);
       const step = limitStepSize(resultantForce);
       currentPosition = {
         x: currentPosition.x + step.x,
         y: currentPosition.y + step.y,
-        rotation: currentPosition.rotation, // Keep rotation unchanged during this phase
+        rotation: currentPosition.rotation,
       };
-      movementPath.push(currentPosition); // Record the step
+      movementPath.push(currentPosition);
     }
 
-    // Phase 2: Simulate rotation in place after reaching target x, y
     while (currentPosition.rotation !== targetPosition.rotation) {
       currentPosition = {
-        x: currentPosition.x, // Keep x and y unchanged
+        x: currentPosition.x,
         y: currentPosition.y,
-        rotation: calculateRotationStep(currentPosition.rotation, targetPosition.rotation), // Rotate chair in place
+        rotation: calculateRotationStep(currentPosition.rotation, targetPosition.rotation),
       };
-      movementPath.push(currentPosition); // Record the step
+      movementPath.push(currentPosition);
     }
 
     return {
@@ -221,6 +213,22 @@ router.post('/move-to-layout', (req, res) => {
     message: 'Movement simulation completed using Artificial Potential Fields.',
     movements,
   });
+});
+
+// New endpoint to send commands with variable values to ESP32 via WebSocket
+router.post('/send-command', (req, res) => {
+  const { command, value } = req.body;
+
+  if (!command) {
+    return res.status(400).json({ error: 'No command provided' });
+  }
+
+  // Construct the command string with the value if provided
+  const fullCommand = value !== undefined ? `${command} ${value}` : command;
+
+  sendCommandToESP32(fullCommand); // Send the command to ESP32
+  console.log(`Command sent to ESP32: ${fullCommand}`);
+  res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
 
 module.exports = router;
