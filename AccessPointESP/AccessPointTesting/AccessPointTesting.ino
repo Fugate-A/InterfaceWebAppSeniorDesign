@@ -4,7 +4,7 @@
 #include <HTTPClient.h>
 
 // Access Point Credentials
-const char* apSsid = "ESP32-Access-Point";
+const char* apSsid = "ChairGuru";
 const char* apPassword = "123456789";
 
 // Custom IP configuration for the AP

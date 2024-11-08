@@ -2,7 +2,7 @@
 #include <WebServer.h>
 
 // Motor Controller WiFi Credentials
-const char* ssid = "ESP32-Access-Point";
+const char* ssid = "ChairGuru";
 const char* password = "123456789";
 
 const int enablePinOut = 15;
