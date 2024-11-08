@@ -37,7 +37,6 @@ int convertToSteps(int units) {
   return units * 17;  // Adjust the conversion factor as needed
 }
 
-// Motor movement functions
 void moveForward(int inches) {
   int steps = convertToSteps(inches);
   Serial.print("Moving forward for ");
@@ -49,19 +48,24 @@ void moveForward(int inches) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < steps; i++) {
+  int slowSteps = steps * 0.1;  // First and last 10% of steps for acceleration and deceleration
+  int normalSteps = steps - (2 * slowSteps);  // Remaining 80% of steps at normal speed
+
+  // Constant speed phase
+  for (int i = 0; i < normalSteps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
     digitalWrite(PULRR, HIGH);
-    delayMicroseconds(20);
+    delayMicroseconds(20);  // Normal delay for full speed
     digitalWrite(PULFL, LOW);
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3000);
-    //delayMicroseconds(2500);
+    delayMicroseconds(3500);
   }
+
+  
 }
 
 void moveBackward(int inches) {
@@ -75,7 +79,13 @@ void moveBackward(int inches) {
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, LOW);
 
-  for (int i = 0; i < steps; i++) {
+  int slowSteps = steps * 0.1;
+  int normalSteps = steps - (2 * slowSteps);
+
+  // Acceleration phase
+
+  // Constant speed phase
+  for (int i = 0; i < normalSteps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
     digitalWrite(PULFR, HIGH);
@@ -85,8 +95,10 @@ void moveBackward(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
+    delayMicroseconds(3500);
   }
+
+  
 }
 
 void translateLeft(int inches) {
@@ -110,7 +122,7 @@ void translateLeft(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
+    delayMicroseconds(3500);
   }
 }
 
@@ -135,7 +147,7 @@ void translateRight(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3000);
+    delayMicroseconds(3500);
     //delayMicroseconds(2500);
   }
 }
@@ -161,7 +173,7 @@ void rotateClockwise(int degrees) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
+    delayMicroseconds(3500);
   }
 }
 
@@ -186,7 +198,7 @@ void rotateCounterClockwise(int degrees) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(2500);
+    delayMicroseconds(3500);
   }
 }
 
