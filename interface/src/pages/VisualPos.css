@@ -1,37 +1,26 @@
 .visual-pos-container {
-  text-align: center;
-  padding: 20px;
-}
-
-.visualization-area {
+  border: 1px solid black;
   position: relative;
-  width: 400px;
-  height: 400px;
-  margin: 20px auto;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  background-color: #f9f9f9;
+  margin: auto;
+  background-color: #f5f5f5;
 }
 
-.center-dot {
+.anchor-dot,
+.tag-dot {
+  width: 20px;
+  height: 20px;
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: red;
   border-radius: 50%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  text-align: center;
+  line-height: 20px;
+  color: white;
+  font-weight: bold;
 }
 
-.position-dot {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: blue;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+.anchor-dot {
+  border: 2px solid black;
 }
-.error {
-  color: red;
+
+.tag-dot {
+  background-color: green;
 }
