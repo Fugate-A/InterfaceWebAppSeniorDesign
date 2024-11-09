@@ -48,9 +48,34 @@ void moveForward(int inches) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
-  int slowSteps = steps * 0.1;  // First and last 10% of steps for acceleration and deceleration
-  int normalSteps = steps - (2 * slowSteps);  // Remaining 80% of steps at normal speed
+    // First and last 10% of steps for acceleration and deceleration
+  int normalSteps = steps;  // Remaining 80% of steps at normal speed
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
+
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
   // Constant speed phase
   for (int i = 0; i < normalSteps; i++) {
     digitalWrite(PULFL, HIGH);
@@ -62,7 +87,7 @@ void moveForward(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
   }
 
   
@@ -80,10 +105,34 @@ void moveBackward(int inches) {
   digitalWrite(DIRRR, LOW);
 
   int slowSteps = steps * 0.1;
-  int normalSteps = steps - (2 * slowSteps);
+  int normalSteps = steps;
 
   // Acceleration phase
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
   // Constant speed phase
   for (int i = 0; i < normalSteps; i++) {
     digitalWrite(PULFL, HIGH);
@@ -95,7 +144,7 @@ void moveBackward(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
   }
 
   
@@ -112,6 +161,32 @@ void translateLeft(int inches) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, LOW);
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
+
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
+
   for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
@@ -122,7 +197,7 @@ void translateLeft(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
   }
 }
 
@@ -137,6 +212,32 @@ void translateRight(int inches) {
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, HIGH);
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
+
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
+
   for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
@@ -147,7 +248,7 @@ void translateRight(int inches) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
     //delayMicroseconds(2500);
   }
 }
@@ -163,6 +264,32 @@ void rotateClockwise(int degrees) {
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, LOW);
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
+
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
+
   for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
@@ -173,7 +300,7 @@ void rotateClockwise(int degrees) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
   }
 }
 
@@ -188,6 +315,32 @@ void rotateCounterClockwise(int degrees) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, HIGH);
 
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(5000);
+  }
+
+  for (int i = 0; i < 35; i++) {
+    digitalWrite(PULFL, HIGH);
+    digitalWrite(PULRL, HIGH);
+    digitalWrite(PULFR, HIGH);
+    digitalWrite(PULRR, HIGH);
+    delayMicroseconds(20);  // Normal delay for full speed
+    digitalWrite(PULFL, LOW);
+    digitalWrite(PULRL, LOW);
+    digitalWrite(PULFR, LOW);
+    digitalWrite(PULRR, LOW);
+    delayMicroseconds(4500);
+  }
+
   for (int i = 0; i < steps; i++) {
     digitalWrite(PULFL, HIGH);
     digitalWrite(PULRL, HIGH);
@@ -198,7 +351,7 @@ void rotateCounterClockwise(int degrees) {
     digitalWrite(PULRL, LOW);
     digitalWrite(PULFR, LOW);
     digitalWrite(PULRR, LOW);
-    delayMicroseconds(3500);
+    delayMicroseconds(4000);
   }
 }
 
