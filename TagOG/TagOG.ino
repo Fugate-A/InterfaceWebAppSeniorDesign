@@ -157,12 +157,3 @@ String create_json_payload() {
 
     return jsonPayload;
 }
-
-// void send_udp(String *msg_json)
-// {
-//     if (client.connected())
-//     {
-//         client.print(*msg_json);
-//         Serial.println("UDP send");
-//     }
-// }
