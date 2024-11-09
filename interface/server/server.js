@@ -1,24 +1,28 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const WebSocket = require('ws');  // Import WebSocket
-const http = require('http');  // Required for the HTTP server
-const { timeLog, time, timeStamp } = require('console');
-require('dotenv').config();  // Load environment variables
+const { MongoClient } = require('mongodb');
+const WebSocket = require('ws'); // Import WebSocket
+const http = require('http'); // Required for the HTTP server
+require('dotenv').config(); // Load environment variables
 
-let client;  // MongoDB client instance
+const express = require('express');
+const cors = require('cors'); // Import CORS middleware
+const app = express();
+app.use(cors());
+
+let client; // MongoDB client instance
+let wsClient = null; // WebSocket client instance for ESP32 communication
 
 // MongoDB connection setup
 const connectToDatabase = async () => {
   try {
-    const uri = process.env.LocalMachineMongoURL;  // MongoDB URI from .env
+    const uri = process.env.LocalMachineMongoURL; // MongoDB URI from .env
 
     if (!uri) {
       throw new Error('MongoDB URI is not defined in the environment variables.');
     }
 
-    // Create a MongoClient for the local MongoDB (note: ssl is disabled for local connections)
+    // Create a MongoClient for the local MongoDB (note: SSL is disabled for local connections)
     client = new MongoClient(uri, {
       useUnifiedTopology: true,
-      // No SSL for local MongoDB
     });
 
     // Connect to MongoDB and ping the database
@@ -27,7 +31,7 @@ const connectToDatabase = async () => {
     console.log('Successfully connected to local MongoDB');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1);  // Exit process on failure
+    process.exit(1); // Exit process on failure
   }
 };
 
@@ -48,19 +52,18 @@ const setupWebSocket = (server) => {
 
   wss.on('connection', (ws) => {
     console.log('New WebSocket client connected');
+    wsClient = ws; // Store this WebSocket client for external use
 
     // Handle incoming WebSocket messages
     ws.on('message', (message) => {
       console.log(`Received message from client: ${message}`);
-      console.log( new Date().toISOString().replace('T', '').substr(0, 19));
-
-      // Echo the message back to the client
-      ws.send(`Server received: ${message}`);
+      ws.send(`Server received: ${message}`); // Echo message back to client
     });
 
     // Handle WebSocket closing
     ws.on('close', () => {
       console.log('Client disconnected');
+      wsClient = null; // Clear the client reference on disconnect
     });
 
     // Handle WebSocket errors
@@ -69,16 +72,48 @@ const setupWebSocket = (server) => {
     });
   });
 
+  // Broadcast function to send updates to all connected WebSocket clients
+  wss.broadcast = (data) => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(data));
+      }
+    });
+  };
+
   console.log('WebSocket server is running');
+
+  // Expose WebSocket broadcast function globally
+  global.wss = wss;
+};
+
+// Function to send a command to the connected ESP32 via WebSocket
+const sendCommandToESP32 = (command) => {
+  if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+    wsClient.send(command);
+    console.log(`Sent command to ESP32: ${command}`);
+  } else {
+    console.error('WebSocket client not connected or not ready');
+  }
+};
+
+// Broadcast data updates to WebSocket clients
+const broadcastUpdate = (data) => {
+  if (global.wss) {
+    global.wss.broadcast(data); // Use the global WebSocket server to broadcast data
+    console.log('Broadcasted data to WebSocket clients:', data);
+  } else {
+    console.error('WebSocket server not available for broadcasting');
+  }
 };
 
 // Start the server and WebSocket
 const startServer = async () => {
-  await connectToDatabase();  // Connect to MongoDB
+  await connectToDatabase(); // Connect to MongoDB
 
   // Use global settings for WebSocket from the .env file
-  const WS_PORT = process.env.WS_PORT || 8081;  // Default WebSocket port
-  const WS_HOST = '0.0.0.0';  // Bind to all available interfaces
+  const WS_PORT = process.env.WS_PORT || 8081; // Default WebSocket port
+  const WS_HOST = '0.0.0.0'; // Bind to all available interfaces
 
   // Listen for HTTP requests and WebSocket connections
   server.listen(WS_PORT, WS_HOST, () => {
@@ -92,4 +127,4 @@ const startServer = async () => {
 // Start the server
 startServer();
 
-module.exports = { connectToDatabase, getClient };
+module.exports = { connectToDatabase, getClient, sendCommandToESP32, broadcastUpdate };

@@ -99,32 +99,58 @@ const Recon = () => {
     }
   };
 
-  // Function to animate the chairs based on movement path
-  const animateChairs = (movements) => {
-    if (!movements || !Array.isArray(movements)) {
-      console.error('No valid movement data provided.');
+  // Function to animate chairs with collision avoidance
+const animateChairs = (movements) => {
+  if (!movements || !Array.isArray(movements)) {
+    console.error('No valid movement data provided.');
+    return;
+  }
+
+  const moveChair = (chairIndex, step = 0) => {
+    if (chairIndex >= movements.length) {
+      checkIfAllChairsAtFinalPosition(); // Check when all chairs have moved
       return;
     }
 
-    movements.forEach((movement, index) => {
-      let step = 0;
-      const interval = setInterval(() => {
-        if (step < movement.movementPath.length) {
-          setCurrentPositions((prevPositions) => {
-            const updatedPositions = [...prevPositions];
-            const newPosition = movement.movementPath[step] || {}; // Handle undefined steps
-            updatedPositions[index] = constrainToViewport(newPosition); // Constrain to viewport
-            console.log(`Chair ${index + 1} position:`, updatedPositions[index]); // Log chair positions
-            return updatedPositions;
+    const movement = movements[chairIndex];
+    if (!movement || !movement.movementPath) {
+      console.error(`No valid movement path for chair ${chairIndex + 1}`);
+      moveChair(chairIndex + 1); // Move to the next chair
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (step < movement.movementPath.length) {
+        setCurrentPositions((prevPositions) => {
+          const updatedPositions = [...prevPositions];
+          const newPosition = movement.movementPath[step] || {}; // Handle undefined steps
+          const constrainedPosition = constrainToViewport(newPosition); // Ensure chair stays within viewport
+
+          // Check for collisions before updating the position
+          const isCollision = updatedPositions.some((pos, idx) => {
+            if (idx === chairIndex || !pos) return false; // Skip current chair
+            return calculateDistance(pos, constrainedPosition) < 50; // Adjust collision threshold (e.g., 50px)
           });
-          step++;
-        } else {
-          clearInterval(interval); // Stop when movement is complete
-          checkIfAllChairsAtFinalPosition();
-        }
-      }, 100); // Set the speed of the animation (100ms for each step)
-    });
+
+          if (!isCollision) {
+            updatedPositions[chairIndex] = constrainedPosition;
+            console.log(`Chair ${chairIndex + 1} position:`, constrainedPosition);
+          } else {
+            console.warn(`Collision detected for Chair ${chairIndex + 1}, delaying movement.`);
+          }
+
+          return updatedPositions;
+        });
+        step++;
+      } else {
+        clearInterval(interval); // Stop when movement is complete
+        moveChair(chairIndex + 1); // Move to the next chair
+      }
+    }, 100); // Speed of the animation (100ms per step)
   };
+
+  moveChair(0); // Start animating the first chair
+};
 
   // Constrain chair position to be within the viewport (adjust based on screen size)
   const constrainToViewport = (position) => {
@@ -147,10 +173,11 @@ const Recon = () => {
     }
   };
 
-  // Utility function to calculate the distance between two points
   const calculateDistance = (pos1, pos2) => {
+    if (!pos1 || !pos2) return Infinity;
     return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2));
   };
+  
 
   return (
     <div className="recon-container">

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import './Overview.css'; // Make sure you have some basic styles for the chairs
+import './Overview.css'; // Ensure you have styles for the layout
 
 const Overview = () => {
   const [layouts, setLayouts] = useState([]);
-  const [selectedLayout, setSelectedLayout] = useState(null); // Will hold the selected layout's details
+  const [selectedLayout, setSelectedLayout] = useState(null); // Holds the selected layout details
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(''); // For success messages
+  const [distance, setDistance] = useState(''); // Distance input
 
   // Function to fetch all layouts
   const fetchLayouts = async () => {
@@ -33,8 +35,8 @@ const Overview = () => {
           throw new Error('Network response was not ok');
         }
         const layout = await response.json();
-        console.log("Selected Layout Data:", layout); // Log layout data to check the structure
-        setSelectedLayout(layout); // Set the selected layout data
+        console.log("Selected Layout Data:", layout);
+        setSelectedLayout(layout); // Set selected layout data
         setErrorMessage(''); // Clear any previous error message
       } catch (error) {
         console.error('Error loading layout details:', error);
@@ -43,12 +45,38 @@ const Overview = () => {
     }
   };
 
+  // Generic function to handle motor commands
+  const handleMotorCommand = async (command) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          command: command,
+          value: parseInt(distance) || 0, // Parse the distance input as an integer, default to 0 if empty
+        }),
+      });
+
+      if (response.ok) {
+        setSuccessMessage(`${command} command sent successfully.`);
+      } else {
+        throw new Error(`Failed to send ${command} command`);
+      }
+    } catch (error) {
+      console.error(`Error sending ${command} command:`, error);
+      setErrorMessage(`Failed to send ${command} command. Please try again.`);
+    }
+  };
+
   return (
     <div>
       <h1>Layout Overview</h1>
 
-      {/* Display error message if any */}
+      {/* Display error or success messages */}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
 
       <label htmlFor="layout-select">Choose a layout:</label>
       <select id="layout-select" onChange={handleLayoutSelection}>
@@ -59,6 +87,28 @@ const Overview = () => {
           </option>
         ))}
       </select>
+
+      {/* Input box for distance or degree */}
+      <div>
+        <label htmlFor="distance-input">Enter Distance/Rotation (inches or degrees):</label>
+        <input
+          id="distance-input"
+          type="number"
+          value={distance}
+          onChange={(e) => setDistance(e.target.value)}
+          placeholder="Enter value"
+        />
+      </div>
+
+      {/* Motor function buttons */}
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={() => handleMotorCommand('moveForward')}>Move Forward</button>
+        <button onClick={() => handleMotorCommand('moveBackward')}>Move Backward</button>
+        <button onClick={() => handleMotorCommand('translateLeft')}>Translate Left</button>
+        <button onClick={() => handleMotorCommand('translateRight')}>Translate Right</button>
+        <button onClick={() => handleMotorCommand('rotateClockwise')}>Rotate Clockwise</button>
+        <button onClick={() => handleMotorCommand('rotateCounterClockwise')}>Rotate Counter-Clockwise</button>
+      </div>
 
       {/* Display the selected layout and render the chairs */}
       {selectedLayout && (
@@ -75,7 +125,7 @@ const Overview = () => {
                   className="chair"
                   style={{
                     transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation}deg)`,
-                    position: 'absolute', // Important for positioning the chairs
+                    position: 'absolute',
                   }}
                 >
                   Chair {index + 1}
