@@ -17,7 +17,7 @@ const char *ssid = "ChairGuru";
 const char *password = "123456789";
 
 // Server settings
-const char *serverUrl = "http://192.168.4.2:8081/api/store-current-chair-poss";
+const char *serverUrl = "http://192.168.4.2:5000/api/store-current-chair-poss";
 
 // Connection pins
 const uint8_t PIN_RST = 27; // Reset pin
