@@ -80,8 +80,7 @@ void sendPositionToServer(const String &shortAddress, float range, float rxPower
 
     http.addHeader("Content-Type", "application/json");
 
-    //String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + "}";
-    //String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + ", \"anchorId\": 2}";
+    // Construct the payload
     String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + ", \"anchorId\": \"" + String(anchorId) + "\"}";
 
     int httpResponseCode = http.POST(payload);
@@ -103,21 +102,28 @@ void sendPositionToServer(const String &shortAddress, float range, float rxPower
 // Callback when a new range is received
 void newRange()
 {
-    String shortAddress = String(DW1000Ranging.getDistantDevice()->getShortAddress(), HEX);
+    // Get the tag's short address
+    String tagShortAddress = String(DW1000Ranging.getDistantDevice()->getShortAddress(), HEX);
+
+    // Construct the full short address for the anchor-tag pair
+    String fullShortAddress = "Anchor" + String(anchorId) + "-Tag" + tagShortAddress;
+
+    // Get range and RX power
     float range = DW1000Ranging.getDistantDevice()->getRange();
     float rxPower = DW1000Ranging.getDistantDevice()->getRXPower();
 
-    Serial.print("from: ");
-    Serial.print(shortAddress);
-    Serial.print("\t Range: ");
+    // Log to Serial Monitor
+    Serial.print("From: ");
+    Serial.print(fullShortAddress);
+    Serial.print("\tRange: ");
     Serial.print(range);
     Serial.print(" m");
-    Serial.print("\t RX power: ");
+    Serial.print("\tRX Power: ");
     Serial.print(rxPower);
     Serial.println(" dBm");
 
     // Send the data to the server
-    sendPositionToServer(shortAddress, range, rxPower);
+    sendPositionToServer(fullShortAddress, range, rxPower);
 }
 
 // Callback for new blinking device
