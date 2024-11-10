@@ -231,4 +231,80 @@ router.post('/send-command', (req, res) => {
   res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
 
+
+// Endpoint to store current chair positions sent by anchors
+router.post('/store-current-chair-poss', async (req, res) => {
+  const { shortAddress, range, rxPower, anchorId } = req.body;
+
+  if (!shortAddress || range === undefined || rxPower === undefined || !anchorId) {
+    return res.status(400).json({ error: 'Missing position data' });
+  }
+
+  const client = getClient();
+
+  if (!client) {
+    console.error('Database client is not connected.');
+    return res.status(500).json({ error: 'Database not connected' });
+  }
+
+  try {
+    const db = client.db(process.env.LocalRoomName);
+    const positionsCollection = db.collection('CurrentPositions');
+
+    // Create a unique identifier for chair-anchor pair
+    const identifier = `${shortAddress}-anchor${anchorId}`;
+
+    // Upsert position data
+    const result = await positionsCollection.updateOne(
+      { identifier },
+      { 
+        $set: { range, rxPower, updatedAt: new Date(), anchorId },
+        $setOnInsert: { shortAddress } // Insert if not already present
+      },
+      { upsert: true }
+    );
+
+    res.status(200).json({ message: 'Position data stored successfully', result });
+  } catch (error) {
+    console.error('Error storing position data:', error);
+    res.status(500).json({ message: 'Failed to store position data.' });
+  }
+});
+
+// Endpoint to retrieve current positions for use in movement calculations
+// Endpoint to fetch current chair positions
+router.get('/current-chair-positions', async (req, res) => {
+  console.log('Received request to fetch current chair positions');
+
+  const client = getClient();
+
+  if (!client) {
+    console.error('Database client is not connected.');
+    return res.status(500).json({ error: 'Database not connected' });
+  }
+
+  try {
+    const db = client.db(process.env.LocalRoomName);
+    const currentPositionsCollection = db.collection('CurrentPositions');
+
+    // Fetch all position data from MongoDB
+    const positions = await currentPositionsCollection.find({}).toArray();
+
+    // Transform data for the frontend visualization
+    const formattedPositions = positions.map((pos) => ({
+      shortAddress: pos.shortAddress || 'Unknown', // Unique identifier of the tag
+      range: pos.range || 0,                      // Distance to anchor
+      rxPower: pos.rxPower || 0,                  // Received signal power
+      anchorId: pos.anchorId || 'Unknown'         // Anchor identifier
+    }));
+
+    console.log('Returning positions:', formattedPositions);
+    res.status(200).json({ positions: formattedPositions });
+  } catch (error) {
+    console.error('Error fetching positions:', error);
+    res.status(500).json({ error: 'Failed to fetch positions.' });
+  }
+});
+
+
 module.exports = router;
