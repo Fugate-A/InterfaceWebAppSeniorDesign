@@ -12,7 +12,6 @@
 
 const char *anchorId = "2";
 
-
 // WiFi credentials
 const char *ssid = "ChairGuru";
 const char *password = "123456789";
@@ -84,7 +83,6 @@ void sendPositionToServer(const String &shortAddress, float range, float rxPower
     //String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + "}";
     //String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + ", \"anchorId\": 2}";
     String payload = "{\"shortAddress\": \"" + shortAddress + "\", \"range\": " + String(range) + ", \"rxPower\": " + String(rxPower) + ", \"anchorId\": \"" + String(anchorId) + "\"}";
-
 
     int httpResponseCode = http.POST(payload);
 

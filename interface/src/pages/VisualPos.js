@@ -36,15 +36,21 @@ const VisualPos = () => {
   const scaleFactor = 100; // Pixels per meter (adjust for visualization size)
 
   const areaWidthPx = demoRoomWidthMeters * scaleFactor; // Total width of the visualization area in pixels
-  const areaHeightPx = 200; // Fixed height for simplicity
+  const areaHeightPx = demoRoomWidthMeters * scaleFactor; // Make it square
 
-  // Calculate tag positions relative to anchors
-  const calculateTagPosition = (anchorX, anchorY, range) => {
-    const adjustedRange = Math.max(0, range); // Ensure non-negative range
-    return {
-      x: anchorX + adjustedRange * scaleFactor,
-      y: anchorY, // Tags remain on the same horizontal level for simplicity
-    };
+  // Calculate triangulated tag position
+  const calculateTagPosition = (anchor1, anchor2, range1, range2) => {
+    if (!anchor1 || !anchor2 || range1 == null || range2 == null) return null;
+
+    // Anchor positions in the square (in pixels)
+    const anchor1Pos = { x: 0, y: 0 }; // Top-left corner
+    const anchor2Pos = { x: areaWidthPx, y: 0 }; // Top-right corner
+
+    // Triangulate tag position based on distances
+    const x = (Math.pow(range1, 2) - Math.pow(range2, 2) + Math.pow(areaWidthPx / scaleFactor, 2)) / (2 * areaWidthPx / scaleFactor);
+    const y = Math.sqrt(Math.abs(Math.pow(range1, 2) - Math.pow(x, 2))); // Use Math.abs to prevent NaN
+
+    return { x: x * scaleFactor, y: y * scaleFactor };
   };
 
   return (
@@ -59,38 +65,42 @@ const VisualPos = () => {
           {/* Place anchors in fixed positions */}
           <div
             className="anchor-dot"
-            style={{ left: '0px', top: `${areaHeightPx / 2}px`, backgroundColor: 'blue' }}
-            title="Anchor 1 (Blue - Left)"
+            style={{ left: '0px', top: '0px', backgroundColor: 'blue' }}
+            title="Anchor 1 (Blue - Top Left)"
           >
             A1
           </div>
           <div
             className="anchor-dot"
-            style={{ left: `${areaWidthPx - 20}px`, top: `${areaHeightPx / 2}px`, backgroundColor: 'red' }}
-            title="Anchor 2 (Red - Right)"
+            style={{ left: `${areaWidthPx - 20}px`, top: '0px', backgroundColor: 'red' }}
+            title="Anchor 2 (Red - Top Right)"
           >
             A2
           </div>
 
-          {/* Visualize tag positions dynamically */}
-          {positions.map((pos, index) => {
-            const anchorX = pos.anchorId === '1' ? 0 : areaWidthPx - 20; // Anchor X position (left or right)
-            const anchorY = areaHeightPx / 2; // Anchor Y position (centered vertically)
-            const tagPosition = calculateTagPosition(anchorX, anchorY, pos.range);
+          {/* Visualize triangulated tag positions */}
+          {(() => {
+            const anchor1 = positions.find((p) => p.anchorId === '1');
+            const anchor2 = positions.find((p) => p.anchorId === '2');
 
-            return (
-              <div
-                key={index}
-                className="tag-dot"
-                style={{
-                  left: `${tagPosition.x}px`,
-                  top: `${tagPosition.y}px`,
-                  backgroundColor: 'green',
-                }}
-                title={`Tag: ${pos.shortAddress}, Anchor: ${pos.anchorId}, Range: ${pos.range}m`}
-              ></div>
-            );
-          })}
+            if (anchor1 && anchor2) {
+              const tagPosition = calculateTagPosition(anchor1, anchor2, anchor1.range, anchor2.range);
+              if (tagPosition) {
+                return (
+                  <div
+                    className="tag-dot"
+                    style={{
+                      left: `${tagPosition.x}px`,
+                      top: `${tagPosition.y}px`,
+                      backgroundColor: 'green',
+                    }}
+                    title={`Tag: ${positions[0]?.shortAddress || 'Unknown'}, X: ${(tagPosition.x / scaleFactor).toFixed(2)}m, Y: ${(tagPosition.y / scaleFactor).toFixed(2)}m`}
+                  ></div>
+                );
+              }
+            }
+            return null;
+          })()}
         </div>
       )}
     </div>
