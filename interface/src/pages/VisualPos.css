@@ -24,3 +24,17 @@
 .tag-dot {
   background-color: green;
 }
+
+.tag-command-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tag-command-button:hover {
+  background-color: #45a049;
+}

@@ -215,22 +215,24 @@ router.post('/move-to-layout', (req, res) => {
   });
 });
 
-// New endpoint to send commands with variable values to ESP32 via WebSocket
+// New endpoint to send commands in the 3-field format to ESP32 via WebSocket
 router.post('/send-command', (req, res) => {
-  const { command, value } = req.body;
+  const { module, command, value } = req.body;
 
-  if (!command) {
-    return res.status(400).json({ error: 'No command provided' });
+  // Validate required fields
+  if (!module || !command) {
+    return res.status(400).json({ error: 'Module and command are required' });
   }
 
-  // Construct the command string with the value if provided
-  const fullCommand = value !== undefined ? `${command} ${value}` : command;
+  // Construct the 3-field message format
+  const fullCommand = value !== undefined
+    ? `${module},${command},${value}` // Include value if provided
+    : `${module},${command},0`;      // Default to "0" for value if undefined
 
-  sendCommandToESP32(fullCommand); // Send the command to ESP32
+  sendCommandToESP32(fullCommand); // Send the message to ESP32
   console.log(`Command sent to ESP32: ${fullCommand}`);
   res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
-
 
 // Endpoint to store current chair positions sent by anchors
 router.post('/store-current-chair-poss', async (req, res) => {
@@ -272,7 +274,6 @@ router.post('/store-current-chair-poss', async (req, res) => {
 });
 
 // Endpoint to retrieve current positions for use in movement calculations
-// Endpoint to fetch current chair positions
 router.get('/current-chair-positions', async (req, res) => {
   console.log('Received request to fetch current chair positions');
 
