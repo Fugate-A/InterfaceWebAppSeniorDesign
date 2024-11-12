@@ -12,11 +12,11 @@ IPAddress local_IP(192, 168, 4, 1);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// WebSocket client object to communicate with the server
 WebSocketsClient webSocket;
 
 // Motor Controller IP Address
-IPAddress motor_IP(192, 168, 4, 3); // IP of motor ESP32
+IPAddress motor_IP(192, 168, 4, 3); //guru1
+//IPAddress motor2_IP(192, 168, 4, 4); //guru2
 
 // Create a WebServer object on port 80
 WebServer server(80);
@@ -38,7 +38,7 @@ void sendMotorCommand(const String& command, int value) {
     Serial.print("Motor Error code: ");
     Serial.println(httpResponseCode);
   }
-  http.end();
+  http.end();  // Close HTTP connection
 }
 
 // WebSocket message handler to handle messages from the server and forward them to the motor ESP
@@ -46,10 +46,21 @@ void handleWebSocketMessage(String message) {
   Serial.print("Received WebSocket message: ");
   Serial.println(message);
 
-  // Parse command and value
+  // Check if the message contains a space (indicating a command and value)
   int spaceIndex = message.indexOf(' ');
+  if (spaceIndex == -1) {
+    Serial.println("Error: Malformed WebSocket message");
+    return;
+  }
+
   String command = message.substring(0, spaceIndex);
   int value = message.substring(spaceIndex + 1).toInt();
+
+  // Check if the parsed value is valid
+  if (value == 0 && message.substring(spaceIndex + 1) != "0") {
+    Serial.println("Error: Invalid value parsed");
+    return;
+  }
 
   // Forward command and value to the motor controller ESP32 via HTTP
   sendMotorCommand(command, value);
