@@ -1,41 +1,24 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ArduinoJson.h>
+#include "TB6600_Code.h"
 
-// Declare shared variables from Combo.ino
-extern const char* ssid;
-extern const char* password;
-extern WebServer server;
+// Define motor pins
+const int PULFL = 16;
+const int DIRFL = 2;
+const int ENAFL = 15;
+const int PULRL = 5;
+const int DIRRL = 17;
+const int ENARL = 15;
+const int PULFR = 22;
+const int DIRFR = 21;
+const int ENAFR = 15;
+const int PULRR = 14;
+const int DIRRR = 12;
+const int ENARR = 15;
 
-const int enablePinOut = 15;
-
-// Motor control pins
-int PULFL = 16;  // Pulse pin for Front-Left motor
-int DIRFL = 2;   // Direction pin for Front-Left motor
-int ENAFL = enablePinOut;
-
-int PULRL = 5;
-int DIRRL = 17;
-int ENARL = enablePinOut;
-
-int PULFR = 22;
-int DIRFR = 21;
-int ENAFR = enablePinOut;
-
-int PULRR = 14;
-int DIRRR = 12;
-int ENARR = enablePinOut;
-
-// Function implementations remain unchanged
-// (Refer to your provided TB6600_Code.cpp for the full content)
-
-
-// Web server on port 80
-//WebServer server(80);
-
-// Convert inches or degrees to steps for the motors
 int convertToSteps(int units) {
-    return units * 17;  // Adjust the conversion factor as needed
+    return units * 17;  // Conversion factor for inches or degrees to steps
 }
 
 void moveForward(int inches) {
@@ -200,81 +183,21 @@ void rotateCounterClockwise(int degrees) {
     delay(1500);
 }
 
-
-
-
-
-
-
-
-
-
-
-void handleMoveRequest() {
-    if (server.hasArg("plain")) {
-        String command = server.arg("plain");
-        Serial.print("Received command: ");
-        Serial.println(command);
-
-        DynamicJsonDocument doc(1024);
-        DeserializationError error = deserializeJson(doc, command);
-        if (error) {
-            Serial.print("JSON parse error: ");
-            Serial.println(error.c_str());
-            server.send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
-            return;
-        }
-
-        String action = doc["command"];
-        int value = doc["value"];
-
-        if (action == "moveForward") {
-            moveForward(value);
-        } else if (action == "moveBackward") {
-            moveBackward(value);
-        } else if (action == "translateLeft") {
-            translateLeft(value);
-        } else if (action == "translateRight") {
-            translateRight(value);
-        } else if (action == "rotateClockwise") {
-            rotateClockwise(value);
-        } else if (action == "rotateCounterClockwise") {
-            rotateCounterClockwise(value);
-        } else {
-            Serial.println("Unknown command");
-            server.send(400, "application/json", "{\"error\":\"Unknown command\"}");
-            return;
-        }
-        server.send(200, "application/json", "{\"status\":\"success\"}");
-    } else {
-        Serial.println("No command received");
-        server.send(400, "application/json", "{\"error\":\"No command received\"}");
-    }
-}
-
+// In motor.cpp
 void setupMotor() {
-    Serial.println("Initializing Motor Pins...");
-    pinMode(PULFL, OUTPUT);
-    pinMode(DIRFL, OUTPUT);
-    pinMode(ENAFL, OUTPUT);
+  // Your motor initialization code here
+  pinMode(PULFL, OUTPUT);
+  pinMode(DIRFL, OUTPUT);
+  pinMode(ENAFL, OUTPUT);
+  pinMode(PULRL, OUTPUT);
+  pinMode(DIRRL, OUTPUT);
+  pinMode(ENARL, OUTPUT);
+  pinMode(PULFR, OUTPUT);
+  pinMode(DIRFR, OUTPUT);
+  pinMode(ENAFR, OUTPUT);
+  pinMode(PULRR, OUTPUT);
+  pinMode(DIRRR, OUTPUT);
+  pinMode(ENARR, OUTPUT);
 
-    pinMode(PULRL, OUTPUT);
-    pinMode(DIRRL, OUTPUT);
-    pinMode(ENARL, OUTPUT);
-
-    pinMode(PULFR, OUTPUT);
-    pinMode(DIRFR, OUTPUT);
-    pinMode(ENAFR, OUTPUT);
-
-    pinMode(PULRR, OUTPUT);
-    pinMode(DIRRR, OUTPUT);
-    pinMode(ENARR, OUTPUT);
-
-    // Set up HTTP routes for motor commands
-    server.on("/move", HTTP_POST, handleMoveRequest);
-    Serial.println("Motor HTTP routes initialized.");
-}
-
-void loopMotor() {
-    server.handleClient();
+  Serial.println("Motor setup complete");
 }

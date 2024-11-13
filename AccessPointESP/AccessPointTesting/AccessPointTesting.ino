@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsClient.h>
+#include <HTTPClient.h>
 
 // Access Point Credentials
 const char* apSsid = "ChairGuru";
@@ -11,94 +12,103 @@ IPAddress local_IP(192, 168, 4, 1);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// WebSocket client for the server (192.168.4.2)
-WebSocketsClient webSocketServer;
+WebSocketsClient webSocket;
 
-// WebSocket client for the combo ESP32 (192.168.4.3)
-WebSocketsClient webSocketCombo;
+// Motor Controller IP Address
+IPAddress motor_IP(192, 168, 4, 3); //guru1
+//IPAddress motor2_IP(192, 168, 4, 4); //guru2
 
 // Create a WebServer object on port 80
 WebServer server(80);
 
-// Function to forward command to the combo ESP32
-void forwardCommandToCombo(const String& message) {
-    Serial.print("Forwarding message to combo ESP32: ");
-    Serial.println(message);
+// Function to send command to the motor controller via HTTP
+void sendMotorCommand(const String& command, int value) {
+  HTTPClient http;
+  http.begin("http://192.168.4.3/move");  // Motor controller endpoint
 
-    // Create a modifiable String object and send it via WebSocket
-    String modifiableMessage = message;
-    webSocketCombo.sendTXT(modifiableMessage);
+  // Create JSON payload with command and value
+  http.addHeader("Content-Type", "application/json");
+  String payload = "{\"command\":\"" + command + "\", \"value\":" + String(value) + "}";
+
+  int httpResponseCode = http.POST(payload);
+  if (httpResponseCode > 0) {
+    Serial.print("Motor HTTP Response code: ");
+    Serial.println(httpResponseCode);
+  } else {
+    Serial.print("Motor Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();  // Close HTTP connection
 }
 
-// WebSocket event handler for the server
-void webSocketServerEvent(WStype_t type, uint8_t *payload, size_t length) {
-    switch (type) {
-        case WStype_DISCONNECTED:
-            Serial.println("WebSocket disconnected from server");
-            break;
-        case WStype_CONNECTED:
-            Serial.println("WebSocket connected to server at 192.168.4.2");
-            webSocketServer.sendTXT("ESP32 Access Point connected to server");
-            break;
-        case WStype_TEXT:
-            // Handle incoming message from the server
-            Serial.print("Message received from server: ");
-            Serial.println((char*)payload);
-            forwardCommandToCombo(String((char*)payload)); // Forward the message to combo ESP32
-            break;
-        case WStype_ERROR:
-            Serial.println("WebSocket error occurred with server");
-            break;
-        default:
-            break;
-    }
+// WebSocket message handler to handle messages from the server and forward them to the motor ESP
+void handleWebSocketMessage(String message) {
+  Serial.print("Received WebSocket message: ");
+  Serial.println(message);
+
+  // Check if the message contains a space (indicating a command and value)
+  int spaceIndex = message.indexOf(' ');
+  if (spaceIndex == -1) {
+    Serial.println("Error: Malformed WebSocket message");
+    return;
+  }
+
+  String command = message.substring(0, spaceIndex);
+  int value = message.substring(spaceIndex + 1).toInt();
+
+  // Check if the parsed value is valid
+  if (value == 0 && message.substring(spaceIndex + 1) != "0") {
+    Serial.println("Error: Invalid value parsed");
+    return;
+  }
+
+  // Forward command and value to the motor controller ESP32 via HTTP
+  sendMotorCommand(command, value);
 }
 
-// WebSocket event handler for the combo ESP32
-void webSocketComboEvent(WStype_t type, uint8_t *payload, size_t length) {
-    switch (type) {
-        case WStype_DISCONNECTED:
-            Serial.println("WebSocket disconnected from combo ESP32");
-            break;
-        case WStype_CONNECTED:
-            Serial.println("WebSocket connected to combo ESP32 at 192.168.4.3");
-            break;
-        case WStype_ERROR:
-            Serial.println("WebSocket error occurred with combo ESP32");
-            break;
-        default:
-            break;
-    }
+// WebSocket event handler to manage WebSocket events
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      Serial.println("WebSocket disconnected from server");
+      break;
+    case WStype_CONNECTED:
+      Serial.println("WebSocket connected to server at 192.168.4.2");
+      webSocket.sendTXT("ESP32 Access Point connected to server");
+      break;
+    case WStype_TEXT:
+      handleWebSocketMessage((char*)payload);
+      break;
+    case WStype_ERROR:
+      Serial.println("WebSocket error occurred");
+      break;
+    default:
+      break;
+  }
 }
 
 void setup() {
-    Serial.begin(115200);
+  Serial.begin(115200);
 
-    // Configure the ESP32 as an access point
-    WiFi.softAPConfig(local_IP, gateway, subnet);
-    WiFi.softAP(apSsid, apPassword);
-    Serial.print("Access Point IP address: ");
-    Serial.println(WiFi.softAPIP());
+  // Set up the ESP32 as an access point
+  WiFi.softAPConfig(local_IP, gateway, subnet);
+  WiFi.softAP(apSsid, apPassword);
+  Serial.print("Access Point IP address: ");
+  Serial.println(WiFi.softAPIP());
 
-    // Start HTTP server for testing purposes
-    server.on("/", []() {
-        server.send(200, "text/plain", "ESP32 WebSocket Access Point");
-    });
-    server.begin();
+  // Start HTTP server for testing purposes
+  server.on("/", []() {
+    server.send(200, "text/plain", "ESP32 WebSocket Access Point");
+  });
+  server.begin();
 
-    // Connect to the WebSocket server at 192.168.4.2
-    webSocketServer.begin("192.168.4.2", 8081, "/"); // Server IP address and port
-    webSocketServer.onEvent(webSocketServerEvent);
-    webSocketServer.setReconnectInterval(5000); // Retry connection every 5 seconds
-
-    // Connect to the WebSocket combo ESP32 at 192.168.4.3
-    webSocketCombo.begin("192.168.4.3", 80, "/ws"); // Combo ESP32 WebSocket endpoint
-    webSocketCombo.onEvent(webSocketComboEvent);
-    webSocketCombo.setReconnectInterval(2500); // Retry connection every 5 seconds
+  // Connect to WebSocket server on 192.168.4.2
+  webSocket.begin("192.168.4.2", 8081, "/"); // Server IP address and port
+  webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
 }
 
 void loop() {
-    server.handleClient();
-    webSocketServer.loop();
-    webSocketCombo.loop();
+  server.handleClient();
+  webSocket.loop();
 }
