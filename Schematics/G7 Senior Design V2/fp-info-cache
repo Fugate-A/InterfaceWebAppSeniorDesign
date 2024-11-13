@@ -1,4 +1,4 @@
-23702458505868246
+23705915172813228
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -89039,6 +89039,13 @@ SS8050-G
 0
 3
 3
+SD V2 USB to UART Components
+USB File Logo
+
+
+0
+0
+0
 SD V2 Voltage Regulator Components
 CAPC2012X135N
 0805_1
@@ -89081,6 +89088,13 @@ Inductor
 0
 2
 2
+SD V2 Voltage Regulator Components
+LightningFootprint
+
+
+0
+0
+0
 SD V2 Voltage Regulator Components
 R1-560K RC0805N_YAG
 
