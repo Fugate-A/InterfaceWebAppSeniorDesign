@@ -1,8 +1,14 @@
+#include "TagOG.h"
 #include <SPI.h>
 #include <DW1000Ranging.h>
 #include <WiFi.h>
 #include "link.h"
 #include <WebServer.h>
+
+// Declare shared variables from Combo.ino
+extern const char* ssid;
+extern const char* password;
+extern WebServer server;
 
 // Pin definitions
 #define SPI_SCK 18
@@ -12,14 +18,7 @@
 #define PIN_RST 27
 #define PIN_IRQ 34
 
-// WiFi credentials
-const char *ssid = "ChairGuru";
-const char *password = "123456789";
-const char *host = "192.168.4.1";
-
 WiFiClient client;
-WebServer server(80); // HTTP server on port 80
-
 struct MyLink *uwb_data;
 int index_num = 0;
 long runtime = 0;
@@ -35,8 +34,8 @@ void inactiveDevice(DW1000Device *device);
 void send_uwb_data();
 String create_json_payload();
 
-// Setup function
-void setup() {
+// Setup function for Tag functionality
+void setupTag() {
     Serial.begin(115200);
 
     // Initialize WiFi
@@ -72,8 +71,8 @@ void setup() {
     uwb_data = init_link();
 }
 
-// Main loop function
-void loop() {
+// Main loop function for Tag functionality
+void loopTag() {
     DW1000Ranging.loop();
     server.handleClient();
 
