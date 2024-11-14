@@ -234,13 +234,12 @@ router.post('/send-command', (req, res) => {
   res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
 
-
 // Endpoint to store current chair positions sent by anchors
 router.post('/store-current-chair-poss', async (req, res) => {
-  const { shortAddress, range, rxPower, anchorId } = req.body;
+  const { links } = req.body; // Extract 'links' array from the JSON payload
 
-  if (!shortAddress || range === undefined || rxPower === undefined || !anchorId) {
-    return res.status(400).json({ error: 'Missing position data' });
+  if (!links || !Array.isArray(links)) {
+    return res.status(400).json({ error: 'Invalid or missing links data' });
   }
 
   const client = getClient();
@@ -254,20 +253,33 @@ router.post('/store-current-chair-poss', async (req, res) => {
     const db = client.db(process.env.LocalRoomName);
     const positionsCollection = db.collection('CurrentPositions');
 
-    // Create a unique identifier for chair-anchor pair
-    const identifier = `${shortAddress}-anchor${anchorId}`;
+    // Process each link object
+    const operations = links.map(({ A, R, dBm }) => {
+      return {
+        updateOne: {
+          filter: { anchorId: A }, // Filter by anchor address
+          update: {
+            $set: {
+              range: R,
+              rxPower: dBm,
+              updatedAt: new Date()
+            },
+            $setOnInsert: { tagId: "Tag1" } // Replace "Tag1" with a unique tag ID if needed
+          },
+          upsert: true // Perform upsert operation
+        }
+      };
+    });
 
-    // Upsert position data
-    const result = await positionsCollection.updateOne(
-      { identifier },
-      { 
-        $set: { range, rxPower, updatedAt: new Date(), anchorId },
-        $setOnInsert: { shortAddress } // Insert if not already present
-      },
-      { upsert: true }
-    );
+    // Perform bulk upsert operations
+    const result = await positionsCollection.bulkWrite(operations);
 
-    res.status(200).json({ message: 'Position data stored successfully', result });
+    res.status(200).json({
+      message: 'Position data stored successfully',
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount
+    });
   } catch (error) {
     console.error('Error storing position data:', error);
     res.status(500).json({ message: 'Failed to store position data.' });

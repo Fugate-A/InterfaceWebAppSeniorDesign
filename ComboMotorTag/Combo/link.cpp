@@ -142,36 +142,65 @@ void delete_link(struct MyLink *p, uint16_t addr)
     return;
 }
 
-void make_link_json(struct MyLink *p, String *s)
+// void make_link_json(struct MyLink *p, String *s) //original make_link_json
+// {
+// #ifdef SERIAL_DEBUG
+//     Serial.println("make_link_json");
+// #endif
+//     //  *s = "{\"links\":[";
+//     *s = "(";
+//     struct MyLink *temp = p;
+
+//     while (temp->next != NULL)
+//     {
+//         temp = temp->next;
+//         char link_json[50];
+//         //gives which board and range data is from
+//         // sprintf(link_json, "{\"A\":\"%X\",\"R\":\"%.1f\"}", temp->anchor_addr, temp->range[0]);
+        
+//         // sprintf(link_json, "%.1f,%.1f", temp->range[0], temp->range[1]);  //will just give the range data points in comparison to the two
+        
+//         //gives range from board in x,y
+//         // sprintf(link_json, "%.2f, %.2f", temp->range[0], temp->range[sizeof(temp->range)/sizeof(temp->range[0]) - 1]);
+
+//         // sprintf(link_json, "{R\":\"%.1f\"}", temp->range[0]);
+//         sprintf(link_json, "%.1f", temp-> range[0]);
+//         *s += link_json;
+//         if (temp->next != NULL)
+//         {
+//             *s += ",";
+//         }
+//     }
+//     // *s += "]}";
+//     *s += ")";
+//     Serial.println(*s);
+// }
+
+void make_link_json(struct MyLink *p, String *s) //json consutrcted objects 
 {
 #ifdef SERIAL_DEBUG
     Serial.println("make_link_json");
 #endif
-    //  *s = "{\"links\":[";
-    *s = "(";
-    struct MyLink *temp = p;
+    *s = "{\"links\":[";
+    struct MyLink *temp = p->next; // Start from the first device after the head
 
-    while (temp->next != NULL)
+    bool first = true;
+    while (temp != NULL)
     {
-        temp = temp->next;
-        char link_json[50];
-        //gives which board and range data is from
-        // sprintf(link_json, "{\"A\":\"%X\",\"R\":\"%.1f\"}", temp->anchor_addr, temp->range[0]);
-        
-        // sprintf(link_json, "%.1f,%.1f", temp->range[0], temp->range[1]);  //will just give the range data points in comparison to the two
-        
-        //gives range from board in x,y
-        // sprintf(link_json, "%.2f, %.2f", temp->range[0], temp->range[sizeof(temp->range)/sizeof(temp->range[0]) - 1]);
-
-        // sprintf(link_json, "{R\":\"%.1f\"}", temp->range[0]);
-        sprintf(link_json, "%.1f", temp-> range[0]);
-        *s += link_json;
-        if (temp->next != NULL)
-        {
+        if (!first) {
             *s += ",";
+        } else {
+            first = false;
         }
+
+        char link_json[100];
+        // Format each anchor with its address and range as JSON
+        snprintf(link_json, sizeof(link_json), "{\"A\":\"%X\",\"R\":\"%.1f\",\"dBm\":\"%.1f\"}", 
+                 temp->anchor_addr, temp->range[0], temp->dbm);
+        //A = address, R = range, dbm = Rx Power
+        *s += link_json;
+        temp = temp->next;
     }
-    // *s += "]}";
-    *s += ")";
+    *s += "]}";
     Serial.println(*s);
 }
