@@ -142,41 +142,41 @@ void delete_link(struct MyLink *p, uint16_t addr)
     return;
 }
 
-// void make_link_json(struct MyLink *p, String *s) //original make_link_json
-// {
-// #ifdef SERIAL_DEBUG
-//     Serial.println("make_link_json");
-// #endif
-//     //  *s = "{\"links\":[";
-//     *s = "(";
-//     struct MyLink *temp = p;
+void make_link_json(struct MyLink *p, String *s) //original make_link_json
+ {
+ #ifdef SERIAL_DEBUG
+     Serial.println("make_link_json");
+ #endif
+       *s = "{\"links\":[";
+     *s = "(";
+   struct MyLink *temp = p;
 
-//     while (temp->next != NULL)
-//     {
-//         temp = temp->next;
-//         char link_json[50];
-//         //gives which board and range data is from
-//         // sprintf(link_json, "{\"A\":\"%X\",\"R\":\"%.1f\"}", temp->anchor_addr, temp->range[0]);
+     while (temp->next != NULL)
+     {
+         temp = temp->next;
+         char link_json[50];
+         //gives which board and range data is from
+          sprintf(link_json, "{\"A\":\"%X\",\"R\":\"%.1f\"}", temp->anchor_addr, temp->range[0]);
         
-//         // sprintf(link_json, "%.1f,%.1f", temp->range[0], temp->range[1]);  //will just give the range data points in comparison to the two
+sprintf(link_json, "%.1f,%.1f", temp->range[0], temp->range[1]);  //will just give the range data points in comparison to the two
         
 //         //gives range from board in x,y
-//         // sprintf(link_json, "%.2f, %.2f", temp->range[0], temp->range[sizeof(temp->range)/sizeof(temp->range[0]) - 1]);
+sprintf(link_json, "%.2f, %.2f", temp->range[0], temp->range[sizeof(temp->range)/sizeof(temp->range[0]) - 1]);
 
-//         // sprintf(link_json, "{R\":\"%.1f\"}", temp->range[0]);
-//         sprintf(link_json, "%.1f", temp-> range[0]);
-//         *s += link_json;
-//         if (temp->next != NULL)
-//         {
-//             *s += ",";
-//         }
-//     }
-//     // *s += "]}";
-//     *s += ")";
-//     Serial.println(*s);
-// }
+sprintf(link_json, "{R\":\"%.1f\"}", temp->range[0]);
+         sprintf(link_json, "%.1f", temp-> range[0]);
+         *s += link_json;
+         if (temp->next != NULL)
+         {
+             *s += ",";
+         }
+     }
+      *s += "]}";
+     *s += ")";
+     Serial.println(*s);
+ }
 
-void make_link_json(struct MyLink *p, String *s) //json consutrcted objects 
+/*void make_link_json(struct MyLink *p, String *s) //json consutrcted objects 
 {
 #ifdef SERIAL_DEBUG
     Serial.println("make_link_json");
@@ -203,4 +203,26 @@ void make_link_json(struct MyLink *p, String *s) //json consutrcted objects
     }
     *s += "]}";
     Serial.println(*s);
-}
+}*/
+/*
+void make_link_json(struct MyLink *p, String *s) {
+    *s = "{\"links\":["; // Start of JSON array
+    struct MyLink *temp = p->next; // Skip the head node
+
+    bool first = true;
+    while (temp != NULL) {
+        if (!first) {
+            *s += ","; // Add a comma between JSON objects
+        } else {
+            first = false;
+        }
+
+        char link_json[100];
+        snprintf(link_json, sizeof(link_json), "{\"A\":\"%X\",\"R\":\"%.1f\",\"dBm\":\"%.1f\"}", 
+                 temp->anchor_addr, temp->range[0], temp->dbm);
+        *s += link_json;
+        temp = temp->next;
+    }
+    *s += "]}"; // End of JSON array
+    Serial.println(*s); // Debug print the JSON payload
+}*/

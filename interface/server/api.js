@@ -254,22 +254,20 @@ router.post('/store-current-chair-poss', async (req, res) => {
     const positionsCollection = db.collection('CurrentPositions');
 
     // Process each link object
-    const operations = links.map(({ A, R, dBm }) => {
-      return {
-        updateOne: {
-          filter: { anchorId: A }, // Filter by anchor address
-          update: {
-            $set: {
-              range: R,
-              rxPower: dBm,
-              updatedAt: new Date()
-            },
-            $setOnInsert: { tagId: "Tag1" } // Replace "Tag1" with a unique tag ID if needed
+    const operations = links.map(({ A, R, dBm }) => ({
+      updateOne: {
+        filter: { anchorId: A, tagId: "Tag1" }, // Filter by anchor address and tag ID
+        update: {
+          $set: {
+            range: parseFloat(R), // Ensure range is stored as a number
+            rxPower: parseFloat(dBm), // Ensure rxPower is stored as a number
+            updatedAt: new Date()
           },
-          upsert: true // Perform upsert operation
-        }
-      };
-    });
+          $setOnInsert: { tagId: "Tag1" } // Add tagId if the document is new
+        },
+        upsert: true // Perform upsert operation
+      }
+    }));
 
     // Perform bulk upsert operations
     const result = await positionsCollection.bulkWrite(operations);
@@ -285,6 +283,7 @@ router.post('/store-current-chair-poss', async (req, res) => {
     res.status(500).json({ message: 'Failed to store position data.' });
   }
 });
+
 
 // Endpoint to retrieve current positions for use in movement calculations
 router.get('/current-chair-positions', async (req, res) => {

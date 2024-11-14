@@ -1,8 +1,7 @@
 #include "TagOG.h" // UWB Tag functionality
 #include "TB6600_Code.h" // Motor control functionality
 #include <WiFi.h>
-#include <WebServer.h>
-#include <HTTPClient.h>
+#include <WebServer.h> // For ESP32, ensure this library is available
 #include <ArduinoJson.h>
 
 // Wi-Fi credentials
@@ -14,33 +13,8 @@ IPAddress motorIP(192, 168, 4, 3);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// API configuration
-const char* serverUrl = "http://192.168.4.2:5000/store-current-chair-poss";
-
 // Web server for motor control
 WebServer server(80);
-
-// Function to send location data to the API
-void sendLocationData(const String& jsonPayload) {
-    HTTPClient http;
-    http.begin(serverUrl);
-    http.addHeader("Content-Type", "application/json");
-
-    // Send the POST request
-    int httpResponseCode = http.POST(jsonPayload);
-
-    // Handle server response
-    if (httpResponseCode > 0) {
-        Serial.print("Server response code: ");
-        Serial.println(httpResponseCode);
-        Serial.println(http.getString());
-    } else {
-        Serial.print("Error sending data to server: ");
-        Serial.println(httpResponseCode);
-    }
-
-    http.end(); // Close connection
-}
 
 // Function to handle motor move requests
 void handleMotorControl() {
@@ -114,12 +88,11 @@ void loop() {
     // Execute UWB Tag operations
     loopTag();
 
-    // Periodically send location data to the server
-    static unsigned long lastSendTime = 0;
-    if (millis() - lastSendTime > 5000) { // Send every 5 seconds
-        String jsonPayload;
-        make_link_json(uwb_data, &jsonPayload); // Generate JSON payload
-        sendLocationData(jsonPayload); // Send to server
-        lastSendTime = millis();
+    // Periodically print location data (no JSON generation)
+    static unsigned long lastPrintTime = 0;
+    if (millis() - lastPrintTime > 5000) { // Print every 5 seconds
+        Serial.println("UWB Tag data updated.");
+        print_link(uwb_data); // Print tag data directly
+        lastPrintTime = millis();
     }
 }
