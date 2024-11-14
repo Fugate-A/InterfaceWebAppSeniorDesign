@@ -1,43 +1,36 @@
-#include "TagOG.h" // Include your Tag library when it's needed
-#include "TB6600_Code.h"
+#include "TagOG.h" // UWB Tag functionality
+#include "TB6600_Code.h" // Motor control functionality
 #include <WiFi.h>
 #include <WebServer.h>
-#include <ArduinoJson.h> // Include ArduinoJson for POST request processing
+#include <ArduinoJson.h>
 
-// WiFi credentials
+// Wi-Fi credentials
 const char* ssid = "ChairGuru";
 const char* password = "123456789";
 
-// Static IP configuration for the motor controller
+// Static IP configuration
 IPAddress motorIP(192, 168, 4, 3);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// Web server declaration
-WebServer server(80);  // HTTP server on port 80
+// Web server for motor control
+WebServer server(80);
 
-// Function to handle the motor move request
+// Function to handle motor move requests
 void handleMotorControl() {
     if (server.hasArg("plain")) {
         String command = server.arg("plain");
-        Serial.print("Received command: ");
-        Serial.println(command);
-
-        // Parse the received JSON command
         DynamicJsonDocument doc(1024);
+
         DeserializationError error = deserializeJson(doc, command);
         if (error) {
-            Serial.print("JSON parse error: ");
-            Serial.println(error.c_str());
-            server.send(400, "application/json", "{\"error\":\"Invalid JSON format\"}");
+            server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
             return;
         }
 
-        // Get action (command) and value (steps or distance)
         String action = doc["command"];
         int value = doc["value"];
 
-        // Handle motor commands
         if (action == "moveForward") {
             moveForward(value);
         } else if (action == "moveBackward") {
@@ -51,50 +44,47 @@ void handleMotorControl() {
         } else if (action == "rotateCounterClockwise") {
             rotateCounterClockwise(value);
         } else {
-            Serial.println("Unknown command");
             server.send(400, "application/json", "{\"error\":\"Unknown command\"}");
             return;
         }
 
-        // Send a success response after executing the motor command
         server.send(200, "application/json", "{\"status\":\"success\"}");
     } else {
-        Serial.println("No command received");
         server.send(400, "application/json", "{\"error\":\"No command received\"}");
     }
 }
 
-// Setup function to initialize motor and network settings
+// Setup function
 void setup() {
     Serial.begin(115200);
 
-    // Connect to Wi-Fi
+    // Configure Wi-Fi
     WiFi.config(motorIP, gateway, subnet);
     WiFi.begin(ssid, password);
 
-    int retryCount = 0;
-    while (WiFi.status() != WL_CONNECTED && retryCount < 20) {
+    while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
-        retryCount++;
     }
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("\nFailed to connect to WiFi. Restarting...");
-        ESP.restart();
-    }
-    Serial.println("\nConnected to WiFi");
+    Serial.println("\nWi-Fi Connected.");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
 
-    // Set up motor pins
+    // Initialize motor and Tag functionality
     setupMotor();
+    setupTag();
 
-    // Initialize motor control and define HTTP POST route for motor movements
+    // Define POST route for motor commands
     server.on("/move", HTTP_POST, handleMotorControl);
     server.begin();
-    Serial.println("Server started and listening on port 80");
+    Serial.println("Server started on port 80.");
 }
 
-// Main loop to handle client requests and motor logic
+// Main loop
 void loop() {
     // Handle HTTP client requests
     server.handleClient();
+
+    // Execute UWB Tag operations
+    loopTag();
 }
