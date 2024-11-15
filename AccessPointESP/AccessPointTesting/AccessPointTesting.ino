@@ -46,18 +46,19 @@ void handleWebSocketMessage(String message) {
   Serial.print("Received WebSocket message: ");
   Serial.println(message);
 
-  // Check if the message contains a space (indicating a command and value)
-  int spaceIndex = message.indexOf(' ');
-  if (spaceIndex == -1) {
+  // Check if the message contains a comma (indicating a command and value)
+  int commaIndex = message.indexOf(',');
+  if (commaIndex == -1) {
     Serial.println("Error: Malformed WebSocket message");
     return;
   }
 
-  String command = message.substring(0, spaceIndex);
-  int value = message.substring(spaceIndex + 1).toInt();
+  // Extract the command and value from the message
+  String command = message.substring(0, commaIndex);
+  int value = message.substring(commaIndex + 1).toInt();
 
   // Check if the parsed value is valid
-  if (value == 0 && message.substring(spaceIndex + 1) != "0") {
+  if (value == 0 && message.substring(commaIndex + 1) != "0") {
     Serial.println("Error: Invalid value parsed");
     return;
   }

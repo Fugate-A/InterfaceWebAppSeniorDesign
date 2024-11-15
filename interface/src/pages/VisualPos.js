@@ -5,6 +5,7 @@ const VisualPos = () => {
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch positions from the server
   const fetchPositions = async () => {
@@ -31,6 +32,33 @@ const VisualPos = () => {
     return () => clearInterval(interval); // Cleanup interval on unmount
   }, []);
 
+  // Function to handle sending the tag command
+  const handleTagCommand = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          command: 'pos',
+          value: 100, // Send 100 position updates
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send command');
+      }
+
+      const result = await response.json();
+      console.log('Command result:', result);
+      setSuccessMessage('Tag command sent successfully!');
+    } catch (error) {
+      console.error('Error sending tag command:', error);
+      setErrorMessage('Failed to send tag command. Please try again.');
+    }
+  };
+
   // Environment variables for dynamic area and scaling
   const demoRoomWidthMeters = parseFloat(process.env.REACT_APP_DRW) || 2; // Width in meters (default to 2m)
   const scaleFactor = 100; // Pixels per meter (adjust for visualization size)
@@ -56,10 +84,10 @@ const VisualPos = () => {
   return (
     <div className="visual-pos-container" style={{ width: `${areaWidthPx}px`, height: `${areaHeightPx}px` }}>
       <h1>Anchor and Tag Positions</h1>
+      {successMessage && <p className="success">{successMessage}</p>}
+      {errorMessage && <p className="error">{errorMessage}</p>}
       {loading ? (
         <p>Loading positions...</p>
-      ) : errorMessage ? (
-        <p className="error">{errorMessage}</p>
       ) : (
         <div className="visualization-area" style={{ position: 'relative', width: '100%', height: '100%' }}>
           {/* Place anchors in fixed positions */}
@@ -80,8 +108,8 @@ const VisualPos = () => {
 
           {/* Visualize triangulated tag positions */}
           {(() => {
-            const anchor1 = positions.find((p) => p.anchorId === '1');
-            const anchor2 = positions.find((p) => p.anchorId === '2');
+            const anchor1 = positions.find((p) => p.anchorId === 'anchor1');
+            const anchor2 = positions.find((p) => p.anchorId === 'anchor2');
 
             if (anchor1 && anchor2) {
               const tagPosition = calculateTagPosition(anchor1, anchor2, anchor1.range, anchor2.range);
@@ -103,6 +131,9 @@ const VisualPos = () => {
           })()}
         </div>
       )}
+      <button className="tag-command-button" onClick={handleTagCommand}>
+        Start Tag Code (100 Updates)
+      </button>
     </div>
   );
 };

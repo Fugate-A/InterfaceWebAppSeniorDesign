@@ -215,29 +215,31 @@ router.post('/move-to-layout', (req, res) => {
   });
 });
 
-// New endpoint to send commands with variable values to ESP32 via WebSocket
+// Endpoint to send commands with command and value fields to ESP32 via WebSocket
 router.post('/send-command', (req, res) => {
   const { command, value } = req.body;
 
+  // Validate required fields
   if (!command) {
-    return res.status(400).json({ error: 'No command provided' });
+    return res.status(400).json({ error: 'Command is required' });
   }
 
-  // Construct the command string with the value if provided
-  const fullCommand = value !== undefined ? `${command} ${value}` : command;
+  // Construct the message format
+  const fullCommand = value !== undefined
+    ? `${command},${value}` // Include value if provided
+    : `${command},0`;       // Default to "0" for value if undefined
 
-  sendCommandToESP32(fullCommand); // Send the command to ESP32
+  sendCommandToESP32(fullCommand); // Send the message to ESP32
   console.log(`Command sent to ESP32: ${fullCommand}`);
   res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
 });
 
-
 // Endpoint to store current chair positions sent by anchors
 router.post('/store-current-chair-poss', async (req, res) => {
-  const { shortAddress, range, rxPower, anchorId } = req.body;
+  const { links } = req.body; // Extract 'links' array from the JSON payload
 
-  if (!shortAddress || range === undefined || rxPower === undefined || !anchorId) {
-    return res.status(400).json({ error: 'Missing position data' });
+  if (!links || !Array.isArray(links)) {
+    return res.status(400).json({ error: 'Invalid or missing links data' });
   }
 
   const client = getClient();
@@ -251,20 +253,33 @@ router.post('/store-current-chair-poss', async (req, res) => {
     const db = client.db(process.env.LocalRoomName);
     const positionsCollection = db.collection('CurrentPositions');
 
-    // Create a unique identifier for chair-anchor pair
-    const identifier = `${shortAddress}-anchor${anchorId}`;
+    // Process each link object
+    const operations = links.map(({ A, R, dBm }) => {
+      return {
+        updateOne: {
+          filter: { anchorId: A }, // Filter by anchor address
+          update: {
+            $set: {
+              range: R,
+              rxPower: dBm,
+              updatedAt: new Date()
+            },
+            $setOnInsert: { tagId: "Tag1" } // Replace "Tag1" with a unique tag ID if needed
+          },
+          upsert: true // Perform upsert operation
+        }
+      };
+    });
 
-    // Upsert position data
-    const result = await positionsCollection.updateOne(
-      { identifier },
-      { 
-        $set: { range, rxPower, updatedAt: new Date(), anchorId },
-        $setOnInsert: { shortAddress } // Insert if not already present
-      },
-      { upsert: true }
-    );
+    // Perform bulk upsert operations
+    const result = await positionsCollection.bulkWrite(operations);
 
-    res.status(200).json({ message: 'Position data stored successfully', result });
+    res.status(200).json({
+      message: 'Position data stored successfully',
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount
+    });
   } catch (error) {
     console.error('Error storing position data:', error);
     res.status(500).json({ message: 'Failed to store position data.' });
@@ -272,7 +287,6 @@ router.post('/store-current-chair-poss', async (req, res) => {
 });
 
 // Endpoint to retrieve current positions for use in movement calculations
-// Endpoint to fetch current chair positions
 router.get('/current-chair-positions', async (req, res) => {
   console.log('Received request to fetch current chair positions');
 
@@ -305,6 +319,76 @@ router.get('/current-chair-positions', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch positions.' });
   }
 });
+// Endpoint to calculate path and send motor commands
+router.post('/calculate-path', async (req, res) => {
+  const { targetPosition, currentPositions } = req.body;
+
+  if (!targetPosition || !Array.isArray(currentPositions)) {
+    return res.status(400).json({ error: 'Invalid target position or current positions data.' });
+  }
+
+  console.log('Received request to calculate delta movement to:', targetPosition);
+
+  try {
+    // Only consider the first chair for movement
+    const currentPosition = currentPositions[0];
+
+    if (!currentPosition) {
+      return res.status(400).json({ error: 'No valid current position provided.' });
+    }
+
+    // Calculate deltas
+    const deltaX = targetPosition.x - currentPosition.x;
+    const deltaY = targetPosition.y - currentPosition.y;
+
+    console.log(`Calculated deltas: X = ${deltaX}, Y = ${deltaY}`);
+
+    // Send motor commands for deltaX and deltaY
+    if (deltaX !== 0) {
+      const commandX = deltaX > 0 ? 'translateRight' : 'translateLeft';
+      const valueX = Math.abs(deltaX);
+      await sendMotorCommand(commandX, valueX);
+    }
+
+    if (deltaY !== 0) {
+      const commandY = deltaY > 0 ? 'moveForward' : 'moveBackward';
+      const valueY = Math.abs(deltaY);
+      await sendMotorCommand(commandY, valueY);
+    }
+
+    res.json({
+      message: 'Motor commands sent successfully.',
+      deltaX,
+      deltaY,
+    });
+  } catch (error) {
+    console.error('Error sending motor commands:', error);
+    res.status(500).json({ error: 'Failed to send motor commands.' });
+  }
+});
+
+// Helper function to determine motor command
+const determineCommand = (step) => {
+  // Determine motor command based on step direction
+  if (Math.abs(step.x) > Math.abs(step.y)) {
+    return step.x > 0 ? 'translateRight' : 'translateLeft';
+  } else {
+    return step.y > 0 ? 'moveForward' : 'moveBackward';
+  }
+};
+
+// Helper function to calculate movement value
+const calculateMovementValue = (step) => {
+  // Calculate magnitude of movement
+  return Math.sqrt(step.x * step.x + step.y * step.y);
+};
+
+// Helper function to send motor command via WebSocket
+const sendMotorCommand = async (command, value) => {
+  const fullCommand = `${command},${value}`;
+  sendCommandToESP32(fullCommand); // Send the command to the ESP32 via WebSocket
+  console.log(`Command sent to ESP32: ${fullCommand}`);
+};
 
 
 module.exports = router;

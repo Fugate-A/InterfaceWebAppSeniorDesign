@@ -48,27 +48,34 @@ const Overview = () => {
   // Generic function to handle motor commands
   const handleMotorCommand = async (command) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          command: command,
-          value: parseInt(distance) || 0, // Parse the distance input as an integer, default to 0 if empty
-        }),
-      });
+        const module = "motors"; // Specify the module
+        const value = parseInt(distance) || 0; // Parse the distance input as an integer, default to 0 if empty
 
-      if (response.ok) {
-        setSuccessMessage(`${command} command sent successfully.`);
-      } else {
-        throw new Error(`Failed to send ${command} command`);
-      }
+        // Send the module, command, and value fields to the API
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                module,    // Send the module
+                command,   // Send the command
+                value,     // Send the value
+            }),
+        });
+
+        if (response.ok) {
+            setSuccessMessage(`${command} command sent successfully.`);
+        } else {
+            const errorResponse = await response.json();
+            console.error('Error response:', errorResponse);
+            throw new Error(`Failed to send ${command} command`);
+        }
     } catch (error) {
-      console.error(`Error sending ${command} command:`, error);
-      setErrorMessage(`Failed to send ${command} command. Please try again.`);
+        console.error(`Error sending ${command} command:`, error);
+        setErrorMessage(`Failed to send ${command} command. Please try again.`);
     }
-  };
+};
 
   return (
     <div>
@@ -108,6 +115,7 @@ const Overview = () => {
         <button onClick={() => handleMotorCommand('translateRight')}>Translate Right</button>
         <button onClick={() => handleMotorCommand('rotateClockwise')}>Rotate Clockwise</button>
         <button onClick={() => handleMotorCommand('rotateCounterClockwise')}>Rotate Counter-Clockwise</button>
+        <button onClick={() => handleMotorCommand('estop')}>EMERGENCY</button>
       </div>
 
       {/* Display the selected layout and render the chairs */}
