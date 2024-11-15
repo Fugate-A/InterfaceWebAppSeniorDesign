@@ -254,20 +254,22 @@ router.post('/store-current-chair-poss', async (req, res) => {
     const positionsCollection = db.collection('CurrentPositions');
 
     // Process each link object
-    const operations = links.map(({ A, R, dBm }) => ({
-      updateOne: {
-        filter: { anchorId: A, tagId: "Tag1" }, // Filter by anchor address and tag ID
-        update: {
-          $set: {
-            range: parseFloat(R), // Ensure range is stored as a number
-            rxPower: parseFloat(dBm), // Ensure rxPower is stored as a number
-            updatedAt: new Date()
+    const operations = links.map(({ A, R, dBm }) => {
+      return {
+        updateOne: {
+          filter: { anchorId: A }, // Filter by anchor address
+          update: {
+            $set: {
+              range: R,
+              rxPower: dBm,
+              updatedAt: new Date()
+            },
+            $setOnInsert: { tagId: "Tag1" } // Replace "Tag1" with a unique tag ID if needed
           },
-          $setOnInsert: { tagId: "Tag1" } // Add tagId if the document is new
-        },
-        upsert: true // Perform upsert operation
-      }
-    }));
+          upsert: true // Perform upsert operation
+        }
+      };
+    });
 
     // Perform bulk upsert operations
     const result = await positionsCollection.bulkWrite(operations);
@@ -283,7 +285,6 @@ router.post('/store-current-chair-poss', async (req, res) => {
     res.status(500).json({ message: 'Failed to store position data.' });
   }
 });
-
 
 // Endpoint to retrieve current positions for use in movement calculations
 router.get('/current-chair-positions', async (req, res) => {
@@ -318,6 +319,99 @@ router.get('/current-chair-positions', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch positions.' });
   }
 });
+
+
+// Endpoint to calculate path and send motor commands
+router.post('/calculate-path', async (req, res) => {
+  const { targetPosition, currentPositions } = req.body;
+
+  if (!targetPosition || !Array.isArray(currentPositions)) {
+    return res.status(400).json({ error: 'Invalid target position or current positions data.' });
+  }
+
+  console.log('Received request to calculate path to:', targetPosition);
+
+  // Initialize response data
+  const movements = [];
+
+  // Iterate through each chair's current position
+  currentPositions.forEach((chair, index) => {
+    const chairMovements = [];
+    let currentPosition = { ...chair };
+
+    // Move towards target position using APF
+    while (calculateDistance(currentPosition, targetPosition) > 1) {
+      const resultantForce = computeResultantForce(currentPosition, targetPosition, []);
+      const step = limitStepSize(resultantForce);
+
+      currentPosition = {
+        x: currentPosition.x + step.x,
+        y: currentPosition.y + step.y,
+        rotation: currentPosition.rotation, // Keep the same rotation for now
+      };
+
+      chairMovements.push(currentPosition);
+    }
+
+    // Add rotation adjustment if required
+    while (currentPosition.rotation !== 0) { // Assume target rotation is 0 for simplicity
+      currentPosition = {
+        x: currentPosition.x,
+        y: currentPosition.y,
+        rotation: calculateRotationStep(currentPosition.rotation, 0),
+      };
+      chairMovements.push(currentPosition);
+    }
+
+    // Store movements for the chair
+    movements.push({
+      chairIndex: index + 1,
+      movementPath: chairMovements,
+    });
+  });
+
+  // Send motor commands for each movement step
+  try {
+    for (const chairMovement of movements) {
+      for (const step of chairMovement.movementPath) {
+        const command = determineCommand(step); // Determine motor command based on step
+        const value = calculateMovementValue(step); // Calculate movement value (distance or angle)
+        await sendMotorCommand(command, value); // Send motor command
+      }
+    }
+
+    res.json({
+      message: 'Path calculated and motor commands sent successfully.',
+      movements,
+    });
+  } catch (error) {
+    console.error('Error sending motor commands:', error);
+    res.status(500).json({ error: 'Failed to send motor commands.' });
+  }
+});
+
+// Helper function to determine motor command
+const determineCommand = (step) => {
+  // Logic to determine motor command (e.g., moveForward, rotateClockwise)
+  if (Math.abs(step.x) > Math.abs(step.y)) {
+    return step.x > 0 ? 'translateRight' : 'translateLeft';
+  } else {
+    return step.y > 0 ? 'moveForward' : 'moveBackward';
+  }
+};
+
+// Helper function to calculate movement value
+const calculateMovementValue = (step) => {
+  return Math.sqrt(step.x * step.x + step.y * step.y); // Calculate Euclidean distance
+};
+
+// Helper function to send motor command via WebSocket
+const sendMotorCommand = async (command, value) => {
+  const module = 'motors';
+  const fullCommand = `${command},${value}`;
+  sendCommandToESP32(fullCommand); // Use WebSocket function
+  console.log(`Command sent to ESP32: ${fullCommand}`);
+};
 
 
 module.exports = router;

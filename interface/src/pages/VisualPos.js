@@ -108,8 +108,8 @@ const VisualPos = () => {
 
           {/* Visualize triangulated tag positions */}
           {(() => {
-            const anchor1 = positions.find((p) => p.anchorId === '1');
-            const anchor2 = positions.find((p) => p.anchorId === '2');
+            const anchor1 = positions.find((p) => p.anchorId === 'anchor1');
+            const anchor2 = positions.find((p) => p.anchorId === 'anchor2');
 
             if (anchor1 && anchor2) {
               const tagPosition = calculateTagPosition(anchor1, anchor2, anchor1.range, anchor2.range);

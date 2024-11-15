@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react
 import Overview from './pages/Overview';
 import CreateLayout from './pages/CreateLayoutPage';
 import LoadLayout from './pages/LayoutListPage';
-import Recon from './pages/Recon'; // Import the new Recon component
-import VisualPos from './pages/VisualPos'; // Import the VisualPos component
+import Recon from './pages/Recon';
+import VisualPos from './pages/VisualPos';
+import AutoMove from './pages/AutoMove'; // Import the AutoMove component
 import './App.css'; // Import the CSS file
 
 function App() {
@@ -23,11 +24,15 @@ function App() {
   };
 
   const handleNavigateToRecon = () => {
-    navigate('/recon'); // Navigate to Recon page
+    navigate('/recon');
   };
 
   const handleNavigateToVisualPos = () => {
-    navigate('/visual-pos'); // Navigate to VisualPos page
+    navigate('/visual-pos');
+  };
+
+  const handleNavigateToAutoMove = () => {
+    navigate('/auto-move'); // Navigate to AutoMove page
   };
 
   return (
@@ -41,7 +46,8 @@ function App() {
         <button className="main-button" onClick={handleNavigateToCreateLayout}>Create New Layout</button>
         <button className="main-button" onClick={handleNavigateToLoadLayout}>Load Existing Layout</button>
         <button className="main-button" onClick={handleNavigateToRecon}>Reconfigure Chairs</button>
-        <button className="main-button" onClick={handleNavigateToVisualPos}>Visualize Positions</button> {/* New button */}
+        <button className="main-button" onClick={handleNavigateToVisualPos}>Visualize Positions</button>
+        <button className="main-button" onClick={handleNavigateToAutoMove}>AutoMove</button> {/* New button */}
       </div>
       <nav className="App-nav">
         <ul>
@@ -49,7 +55,8 @@ function App() {
           <li><Link to="/create-layout" className="nav-link">Create Layout</Link></li>
           <li><Link to="/load-layout" className="nav-link">Load Layout</Link></li>
           <li><Link to="/recon" className="nav-link">Reconfigure Chairs</Link></li>
-          <li><Link to="/visual-pos" className="nav-link">Visualize Positions</Link></li> {/* New link */}
+          <li><Link to="/visual-pos" className="nav-link">Visualize Positions</Link></li>
+          <li><Link to="/auto-move" className="nav-link">AutoMove</Link></li> {/* New link */}
         </ul>
       </nav>
     </div>
@@ -66,7 +73,8 @@ function Main() {
         <Route path="/create-layout" element={<CreateLayout />} />
         <Route path="/load-layout" element={<LoadLayout />} />
         <Route path="/recon" element={<Recon />} />
-        <Route path="/visual-pos" element={<VisualPos />} /> {/* New route */}
+        <Route path="/visual-pos" element={<VisualPos />} />
+        <Route path="/auto-move" element={<AutoMove />} /> {/* New route */}
       </Routes>
     </Router>
   );

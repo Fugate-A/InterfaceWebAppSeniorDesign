@@ -1,0 +1,98 @@
+.auto-move-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.auto-move-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.auto-move-description {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #555;
+}
+
+.auto-move-grid {
+  position: relative;
+  width: 300px; /* Adjust size to match the defined area (in pixels) */
+  height: 300px; /* Make it square */
+  border: 2px solid #007bff;
+  background-color: #e9ecef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.auto-move-grid .anchor-dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auto-move-grid .anchor-dot:nth-child(1) {
+  top: 0;
+  left: 0;
+}
+
+.auto-move-grid .anchor-dot:nth-child(2) {
+  top: 0;
+  right: 0;
+}
+
+.auto-move-grid .tag-dot {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: green;
+  transform: translate(-50%, -50%);
+}
+
+.auto-move-grid .click-dot {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: red;
+  transform: translate(-50%, -50%);
+}
+
+.auto-move-button {
+  margin-top: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auto-move-button:hover {
+  background-color: #0056b3;
+}
+
+.auto-move-message {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: green;
+  text-align: center;
+}
