@@ -142,70 +142,48 @@ const Recon = () => {
       return;
     }
   
-    movements.forEach((movement, index) => {
-      if (!movement.anchorId) {
-        console.error(`Missing anchorId for chair at index ${index}`);
-      } else {
-        console.log(`Processing chair ${movement.anchorId}:`, movement);
+    // Loop through all chairs
+    movements.forEach(async (movement, chairIndex) => {
+      if (!movement || !movement.movementPath || !movement.anchorId) {
+        console.error(`Invalid movement data for chair at index ${chairIndex}`);
+        return;
+      }
+  
+      const { anchorId, movementPath } = movement;
+  
+      // Calculate the total delta for x and y directions
+      const totalDeltaX = movementPath[movementPath.length - 1].x - movementPath[0].x;
+      const totalDeltaY = movementPath[movementPath.length - 1].y - movementPath[0].y;
+  
+      // Send commands only once for the total movement in each direction
+      try {
+        if (totalDeltaX !== 0) {
+          const commandX = totalDeltaX > 0 ? 'translateRight' : 'translateLeft';
+          await sendMovementCommand(anchorId, commandX, Math.abs(totalDeltaX) * 655);
+        }
+  
+        if (totalDeltaY !== 0) {
+          const commandY = totalDeltaY > 0 ? 'moveForward' : 'moveBackward';
+          await sendMovementCommand(anchorId, commandY, Math.abs(totalDeltaY) * 655);
+        }
+  
+        // Update chair's final position in the frontend
+        setCurrentPositions((prevPositions) => {
+          const updatedPositions = [...prevPositions];
+          updatedPositions[chairIndex] = movementPath[movementPath.length - 1];
+          return updatedPositions;
+        });
+  
+        console.log(`Movement for chair ${anchorId} completed.`);
+      } catch (error) {
+        console.error(`Error sending movement commands for chair ${anchorId}:`, error);
       }
     });
   
-    const moveChair = (chairIndex, step = 0) => {
-      if (chairIndex >= movements.length) {
-        checkIfAllChairsAtFinalPosition(); // Check when all chairs have moved
-        return;
-      }
-  
-      const movement = movements[chairIndex];
-      if (!movement || !movement.movementPath) {
-        console.error(`No valid movement path for chair ${chairIndex + 1}`);
-        moveChair(chairIndex + 1); // Move to the next chair
-        return;
-      }
-  
-      const { anchorId, movementPath } = movement; // Extract chair's ID and path
-      if (!anchorId) {
-        console.error(`Missing anchorId for chair at index ${chairIndex}`);
-        return;
-      }
-  
-      const interval = setInterval(async () => {
-        if (step < movementPath.length) {
-          const currentStep = movementPath[step];
-          const nextStep = movementPath[step + 1];
-  
-          if (nextStep) {
-            const deltaX = nextStep.x - currentStep.x;
-            const deltaY = nextStep.y - currentStep.y;
-  
-            if (deltaX !== 0) {
-              const commandX = deltaX > 0 ? 'translateRight' : 'translateLeft';
-              await sendMovementCommand(anchorId, commandX, Math.abs(deltaX) * 655);
-            }
-  
-            if (deltaY !== 0) {
-              const commandY = deltaY > 0 ? 'moveForward' : 'moveBackward';
-              await sendMovementCommand(anchorId, commandY, Math.abs(deltaY) * 655);
-            }
-          }
-  
-          setCurrentPositions((prevPositions) => {
-            const updatedPositions = [...prevPositions];
-            updatedPositions[chairIndex] = { ...currentStep };
-            return updatedPositions;
-          });
-  
-          step++;
-        } else {
-          clearInterval(interval); // Stop when movement is complete
-          moveChair(chairIndex + 1); // Move to the next chair
-        }
-      }, 1000); // Adjust the interval time to match the chair's real-world movement speed
-    };
-  
-    moveChair(0); // Start animating the first chair
+    // Once all chairs are done moving, check their positions
+    checkIfAllChairsAtFinalPosition();
   };
-  
+    
 
   // Function to check if all chairs have reached their final position
   const checkIfAllChairsAtFinalPosition = () => {
