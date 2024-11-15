@@ -14,17 +14,20 @@ IPAddress subnet(255, 255, 255, 0);
 
 WebSocketsClient webSocket;
 
-// Motor Controller IP Address
-IPAddress motor_IP(192, 168, 4, 3); //guru1
-//IPAddress motor2_IP(192, 168, 4, 4); //guru2
+// Chair IP Mapping
+const char* chairIPMap[] = {
+    "192.168.4.3", // Chair 1
+    "192.168.4.4"  // Chair 2
+};
 
 // Create a WebServer object on port 80
 WebServer server(80);
 
 // Function to send command to the motor controller via HTTP
-void sendMotorCommand(const String& command, int value) {
+void sendMotorCommand(const String& targetIP, const String& command, int value) {
   HTTPClient http;
-  http.begin("http://192.168.4.3/move");  // Motor controller endpoint
+  String url = "http://" + targetIP + "/move"; // Motor controller endpoint
+  http.begin(url);
 
   // Create JSON payload with command and value
   http.addHeader("Content-Type", "application/json");
@@ -38,37 +41,88 @@ void sendMotorCommand(const String& command, int value) {
     Serial.print("Motor Error code: ");
     Serial.println(httpResponseCode);
   }
-  http.end();  // Close HTTP connection
+  http.end(); // Close HTTP connection
 }
 
-// WebSocket message handler to handle messages from the server and forward them to the motor ESP
+/*// WebSocket message handler to handle messages from the server and forward them to the motor ESP
 void handleWebSocketMessage(String message) {
   Serial.print("Received WebSocket message: ");
   Serial.println(message);
 
-  // Check if the message contains a comma (indicating a command and value)
-  int commaIndex = message.indexOf(',');
-  if (commaIndex == -1) {
+  // Extract chair identifier, command, and value from the message
+  int firstSpaceIndex = message.indexOf(' ');
+  int secondSpaceIndex = message.indexOf(' ', firstSpaceIndex + 1);
+  if (firstSpaceIndex == -1 || secondSpaceIndex == -1) {
     Serial.println("Error: Malformed WebSocket message");
     return;
   }
 
-  // Extract the command and value from the message
-  String command = message.substring(0, commaIndex);
-  int value = message.substring(commaIndex + 1).toInt();
+  String chairId = message.substring(firstSpaceIndex + 1, secondSpaceIndex); // Extract chair identifier
+  String commandValuePart = message.substring(secondSpaceIndex + 1);         // Extract command and value
 
-  // Check if the parsed value is valid
-  if (value == 0 && message.substring(commaIndex + 1) != "0") {
-    Serial.println("Error: Invalid value parsed");
+  int commaIndex = commandValuePart.indexOf(',');
+  if (commaIndex == -1) {
+    Serial.println("Error: Malformed command-value pair");
     return;
   }
 
-  // Forward command and value to the motor controller ESP32 via HTTP
-  sendMotorCommand(command, value);
+  String command = commandValuePart.substring(0, commaIndex); // Extract command
+  int value = commandValuePart.substring(commaIndex + 1).toInt(); // Extract value
+
+  // Determine target IP based on chair identifier
+  int chairIndex = -1;
+  if (chairId == "chair1") {
+    chairIndex = 0;
+  } else if (chairId == "chair2") {
+    chairIndex = 1;
+  } else {
+    Serial.println("Error: Unknown chair identifier");
+    return;
+  }
+
+  String targetIP = chairIPMap[chairIndex];
+
+  // Forward command and value to the appropriate motor controller ESP32
+  sendMotorCommand(targetIP, command, value);
+}*/
+
+void handleWebSocketMessage(String message) {
+  Serial.print("Received WebSocket message: ");
+  Serial.println(message);
+
+  // Extract chair identifier, command, and value from the message
+  int firstSpaceIndex = message.indexOf(' ');
+  int secondSpaceIndex = message.indexOf(' ', firstSpaceIndex + 1);
+
+  if (firstSpaceIndex == -1 || secondSpaceIndex == -1) {
+    Serial.println("Error: Malformed WebSocket message");
+    return;
+  }
+
+  String chairId = message.substring(0, firstSpaceIndex); // Extract chair identifier
+  String command = message.substring(firstSpaceIndex + 1, secondSpaceIndex); // Extract command
+  String valueString = message.substring(secondSpaceIndex + 1); // Extract value as string
+  int value = valueString.toInt(); // Convert value to integer
+
+  // Determine target IP based on chair identifier
+  int chairIndex = -1;
+  if (chairId == "chair1") {
+    chairIndex = 0;
+  } else if (chairId == "chair2") {
+    chairIndex = 1;
+  } else {
+    Serial.println("Error: Unknown chair identifier");
+    return;
+  }
+
+  String targetIP = chairIPMap[chairIndex];
+
+  // Forward command and value to the appropriate motor controller ESP32
+  sendMotorCommand(targetIP, command, value);
 }
 
 // WebSocket event handler to manage WebSocket events
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
     case WStype_DISCONNECTED:
       Serial.println("WebSocket disconnected from server");

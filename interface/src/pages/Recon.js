@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import './Recon.css'; // Ensure that you have basic styles for the recon page
 
 const Recon = () => {
+  // Chair IP mapping
+  const chairIPMap = {
+    chair1: '192.168.4.3',
+    chair2: '192.168.4.4',
+  };
+
   const [layouts, setLayouts] = useState([]);
   const [selectedLayout, setSelectedLayout] = useState(null); // current layout
   const [desiredLayout, setDesiredLayout] = useState(null); // State for desired layout
@@ -40,7 +46,7 @@ const Recon = () => {
     const layoutId = event.target.value;
     if (layoutId) {
       const layout = layouts.find((layout) => layout._id === layoutId);
-      setSelectedLayout(layout); 
+      setSelectedLayout(layout);
       setCurrentPositions(layout.items || []); // Initialize current positions, handle undefined items
     } else {
       setSelectedLayout(null);
@@ -75,7 +81,7 @@ const Recon = () => {
         body: JSON.stringify({
           layout1Items: selectedLayout.items || [],
           layout2Items: desiredLayout.items || [],
-          obstacles: [] // Add obstacles if any (currently none)
+          obstacles: [], // Add obstacles if any (currently none)
         }),
       });
 
@@ -92,84 +98,127 @@ const Recon = () => {
         console.error('No movement data returned from the server.');
         alert('Error: No movement data returned.');
       }
-
     } catch (error) {
       console.error('Error during reconfiguration:', error);
       alert('Failed to reconfigure layout. Please try again.');
     }
   };
 
-  // Function to animate chairs with collision avoidance
-const animateChairs = (movements) => {
-  if (!movements || !Array.isArray(movements)) {
-    console.error('No valid movement data provided.');
-    return;
-  }
-
-  const moveChair = (chairIndex, step = 0) => {
-    if (chairIndex >= movements.length) {
-      checkIfAllChairsAtFinalPosition(); // Check when all chairs have moved
-      return;
-    }
-
-    const movement = movements[chairIndex];
-    if (!movement || !movement.movementPath) {
-      console.error(`No valid movement path for chair ${chairIndex + 1}`);
-      moveChair(chairIndex + 1); // Move to the next chair
-      return;
-    }
-
-    const interval = setInterval(() => {
-      if (step < movement.movementPath.length) {
-        setCurrentPositions((prevPositions) => {
-          const updatedPositions = [...prevPositions];
-          const newPosition = movement.movementPath[step] || {}; // Handle undefined steps
-          const constrainedPosition = constrainToViewport(newPosition); // Ensure chair stays within viewport
-
-          // Check for collisions before updating the position
-          const isCollision = updatedPositions.some((pos, idx) => {
-            if (idx === chairIndex || !pos) return false; // Skip current chair
-            return calculateDistance(pos, constrainedPosition) < 50; // Adjust collision threshold (e.g., 50px)
-          });
-
-          if (!isCollision) {
-            updatedPositions[chairIndex] = constrainedPosition;
-            console.log(`Chair ${chairIndex + 1} position:`, constrainedPosition);
-          } else {
-            console.warn(`Collision detected for Chair ${chairIndex + 1}, delaying movement.`);
-          }
-
-          return updatedPositions;
-        });
-        step++;
-      } else {
-        clearInterval(interval); // Stop when movement is complete
-        moveChair(chairIndex + 1); // Move to the next chair
+  // Function to send movement commands to a specific chair
+  const sendMovementCommand = async (anchorId, command, value) => {
+    try {
+      if (!anchorId) {
+        throw new Error("anchorId is undefined. Command not sent.");
       }
-    }, 100); // Speed of the animation (100ms per step)
+
+      //const chairIP = chairIPMap[anchorId];
+      const chairIP = chairIPMap[anchorId.toLowerCase()]; // Normalize to lowercase
+      if (!chairIP) {
+        throw new Error(`Unknown anchorId: ${anchorId}`);
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ anchorId, command, value }), // Include the chair's ID
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to send command to ${anchorId}: ${errorText}`);
+      } else {
+        console.log(`Command sent to ${anchorId}: ${command}, ${value}`);
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
   };
 
-  moveChair(0); // Start animating the first chair
-};
-
-  // Constrain chair position to be within the viewport (adjust based on screen size)
-  const constrainToViewport = (position) => {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    return {
-      x: Math.min(Math.max(position.x, 0), viewportWidth - 50), // Keep within viewport width, assuming chair size is 50px
-      y: Math.min(Math.max(position.y, 0), viewportHeight - 50), // Keep within viewport height, assuming chair size is 50px
-      rotation: position.rotation || 0, // Ensure the rotation is respected
+  const animateChairs = (movements) => {
+    if (!movements || !Array.isArray(movements)) {
+      console.error('No valid movement data provided.');
+      return;
+    }
+  
+    movements.forEach((movement, index) => {
+      if (!movement.anchorId) {
+        console.error(`Missing anchorId for chair at index ${index}`);
+      } else {
+        console.log(`Processing chair ${movement.anchorId}:`, movement);
+      }
+    });
+  
+    const moveChair = (chairIndex, step = 0) => {
+      if (chairIndex >= movements.length) {
+        checkIfAllChairsAtFinalPosition(); // Check when all chairs have moved
+        return;
+      }
+  
+      const movement = movements[chairIndex];
+      if (!movement || !movement.movementPath) {
+        console.error(`No valid movement path for chair ${chairIndex + 1}`);
+        moveChair(chairIndex + 1); // Move to the next chair
+        return;
+      }
+  
+      const { anchorId, movementPath } = movement; // Extract chair's ID and path
+      if (!anchorId) {
+        console.error(`Missing anchorId for chair at index ${chairIndex}`);
+        return;
+      }
+  
+      const interval = setInterval(async () => {
+        if (step < movementPath.length) {
+          const currentStep = movementPath[step];
+          const nextStep = movementPath[step + 1];
+  
+          if (nextStep) {
+            const deltaX = nextStep.x - currentStep.x;
+            const deltaY = nextStep.y - currentStep.y;
+  
+            if (deltaX !== 0) {
+              const commandX = deltaX > 0 ? 'translateRight' : 'translateLeft';
+              await sendMovementCommand(anchorId, commandX, Math.abs(deltaX) * 655);
+            }
+  
+            if (deltaY !== 0) {
+              const commandY = deltaY > 0 ? 'moveForward' : 'moveBackward';
+              await sendMovementCommand(anchorId, commandY, Math.abs(deltaY) * 655);
+            }
+          }
+  
+          setCurrentPositions((prevPositions) => {
+            const updatedPositions = [...prevPositions];
+            updatedPositions[chairIndex] = { ...currentStep };
+            return updatedPositions;
+          });
+  
+          step++;
+        } else {
+          clearInterval(interval); // Stop when movement is complete
+          moveChair(chairIndex + 1); // Move to the next chair
+        }
+      }, 1000); // Adjust the interval time to match the chair's real-world movement speed
     };
+  
+    moveChair(0); // Start animating the first chair
   };
+  
 
   // Function to check if all chairs have reached their final position
   const checkIfAllChairsAtFinalPosition = () => {
-    if (currentPositions.every((pos, index) => calculateDistance(pos, desiredLayout.items[index]) < 1 && pos.rotation === desiredLayout.items[index].rotation)) {
+    if (
+      currentPositions.every(
+        (pos, index) =>
+          calculateDistance(pos, desiredLayout.items[index]) < 1 &&
+          pos.rotation === desiredLayout.items[index].rotation
+      )
+    ) {
       setAtFinalLayout(true); // Mark as at final layout when all chairs have reached their target
       setReconFinished(true); // Mark reconfiguration as finished
-      console.log("Reconfiguration complete.");
+      console.log('Reconfiguration complete.');
     }
   };
 
@@ -177,7 +226,6 @@ const animateChairs = (movements) => {
     if (!pos1 || !pos2) return Infinity;
     return Math.sqrt(Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2));
   };
-  
 
   return (
     <div className="recon-container">
@@ -196,18 +244,11 @@ const animateChairs = (movements) => {
         Reconfigure
       </button>
 
-      {reconFinished && (
-        <h3>Recon finished</h3> // Final message when reconfiguration is complete
-      )}
+      {reconFinished && <h3>Recon finished</h3>}
+      {atFinalLayout && <h3>All chairs have reached {desiredLayout.layoutName}</h3>}
 
-      {atFinalLayout && (
-        <h3>All chairs have reached {desiredLayout.layoutName}</h3>
-      )}
-
-      {/* Show error message if there's any */}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
-      {/* Loading state */}
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -232,23 +273,23 @@ const animateChairs = (movements) => {
             ))}
           </select>
 
-          {/* Display the chairs with animation */}
           <div className="layout-display">
-            {currentPositions.length > 0 && currentPositions.map((item, index) => (
-              item && item.x !== undefined && item.y !== undefined ? ( // Defensive check for undefined x and y
-                <div
-                  key={index}
-                  className="chair"
-                  style={{
-                    transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation || 0}deg)`,
-                    position: 'absolute',
-                    transition: 'transform 0.1s ease-out', // Smooth transition for animation
-                  }}
-                >
-                  Chair {index + 1} (x: {item.x}, y: {item.y}, rotation: {item.rotation}°)
-                </div>
-              ) : null // Skip rendering if item is undefined
-            ))}
+            {currentPositions.length > 0 &&
+              currentPositions.map((item, index) =>
+                item && item.x !== undefined && item.y !== undefined ? (
+                  <div
+                    key={index}
+                    className="chair"
+                    style={{
+                      transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation || 0}deg)`,
+                      position: 'absolute',
+                      transition: 'transform 0.1s ease-out',
+                    }}
+                  >
+                    Chair {index + 1} (x: {item.x}, y: {item.y}, rotation: {item.rotation}°)
+                  </div>
+                ) : null
+              )}
           </div>
         </>
       )}
