@@ -11,9 +11,12 @@ const AutoMove = () => {
 
   const demoRoomWidthMeters = parseFloat(process.env.REACT_APP_DRW) || 3;
   const scaleFactor = 200;
-  const stepsPerMeter = 100; // Define the number of steps required per meter
   const areaWidthPx = demoRoomWidthMeters * scaleFactor;
   const areaHeightPx = demoRoomWidthMeters * scaleFactor;
+
+  // Scaling constants for motor commands
+  const MOTOR_STEPS_PER_ROTATION = 1625;
+  const MOTOR_STEPS_PER_METER = 655;
 
   const fetchPositions = async () => {
     setLoading(true);
@@ -74,22 +77,65 @@ const AutoMove = () => {
     setErrorMessage("");
   };
 
-  const calculateSteps = () => {
+  const calculateSteps = async () => {
     if (!tagPosition || !targetPosition) {
       setErrorMessage("Both tag position and target position are required.");
       return;
     }
-
+  
+    // Calculate deltas in meters
     const deltaX = targetPosition.x - tagPosition.x;
     const deltaY = targetPosition.y - tagPosition.y;
-
-    const stepsX = Math.round(deltaX * stepsPerMeter);
-    const stepsY = Math.round(deltaY * stepsPerMeter);
-
-    console.log(`Steps required: X = ${stepsX}, Y = ${stepsY}`);
-    setSuccessMessage(`Calculated steps: X = ${stepsX}, Y = ${stepsY}`);
+  
+    // Convert deltas to motor steps and apply scaling
+    const motorStepsX = Math.round(deltaX * MOTOR_STEPS_PER_METER);
+    const motorStepsY = Math.round(deltaY * MOTOR_STEPS_PER_METER);
+  
+    console.log(`Deltas (meters): X=${deltaX.toFixed(2)}, Y=${deltaY.toFixed(2)}`);
+    console.log(`Motor Steps (pre-scaled): X=${motorStepsX}, Y=${motorStepsY}`);
+  
+    // Scale motor steps for actual movement
+    const scaledMotorStepsX = deltaX * 655;
+    const scaledMotorStepsY = deltaY * 655;
+  
+    console.log(`Motor Steps (scaled): X=${scaledMotorStepsX}, Y=${scaledMotorStepsY}`);
+  
+    // Ensure motor step values are properly scaled
+    if (scaledMotorStepsX === 0 && scaledMotorStepsY === 0) {
+      setErrorMessage("Calculated motor steps are too small to move.");
+      console.error("Motor steps are zero after scaling. Skipping movement.");
+      return;
+    }
+  
+    // Send movement command to backend
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/calculate-path`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetPosition: targetPosition,
+          currentPositions: [{ x: tagPosition.x, y: tagPosition.y }], // Include Chair 1 position
+          motorSteps: { x: scaledMotorStepsX * 655 , y: scaledMotorStepsY * 655 }, // Send properly scaled motor steps
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Movement initiated:", data);
+        setSuccessMessage(
+          `Movement initiated successfully. Scaled Motor Steps: X=${scaledMotorStepsX}, Y=${scaledMotorStepsY}`
+        );
+      } else {
+        const errorData = await response.json();
+        console.error("Error initiating movement:", errorData);
+        setErrorMessage(errorData.error || "Failed to initiate movement.");
+      }
+    } catch (error) {
+      console.error("Error sending movement request:", error);
+      setErrorMessage("Error communicating with the backend.");
+    }
   };
-
+  
   return (
     <div className="auto-move-container">
       <h1>Auto Move</h1>
@@ -152,7 +198,7 @@ const AutoMove = () => {
           ></div>
         )}
       </div>
-      <button onClick={calculateSteps}>Calculate Steps</button>
+      <button onClick={calculateSteps}>Send Command</button>
     </div>
   );
 };

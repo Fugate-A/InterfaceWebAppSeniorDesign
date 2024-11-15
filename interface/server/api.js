@@ -319,8 +319,6 @@ router.get('/current-chair-positions', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch positions.' });
   }
 });
-
-
 // Endpoint to calculate path and send motor commands
 router.post('/calculate-path', async (req, res) => {
   const { targetPosition, currentPositions } = req.body;
@@ -329,60 +327,39 @@ router.post('/calculate-path', async (req, res) => {
     return res.status(400).json({ error: 'Invalid target position or current positions data.' });
   }
 
-  console.log('Received request to calculate path to:', targetPosition);
+  console.log('Received request to calculate delta movement to:', targetPosition);
 
-  // Initialize response data
-  const movements = [];
-
-  // Iterate through each chair's current position
-  currentPositions.forEach((chair, index) => {
-    const chairMovements = [];
-    let currentPosition = { ...chair };
-
-    // Move towards target position using APF
-    while (calculateDistance(currentPosition, targetPosition) > 1) {
-      const resultantForce = computeResultantForce(currentPosition, targetPosition, []);
-      const step = limitStepSize(resultantForce);
-
-      currentPosition = {
-        x: currentPosition.x + step.x,
-        y: currentPosition.y + step.y,
-        rotation: currentPosition.rotation, // Keep the same rotation for now
-      };
-
-      chairMovements.push(currentPosition);
-    }
-
-    // Add rotation adjustment if required
-    while (currentPosition.rotation !== 0) { // Assume target rotation is 0 for simplicity
-      currentPosition = {
-        x: currentPosition.x,
-        y: currentPosition.y,
-        rotation: calculateRotationStep(currentPosition.rotation, 0),
-      };
-      chairMovements.push(currentPosition);
-    }
-
-    // Store movements for the chair
-    movements.push({
-      chairIndex: index + 1,
-      movementPath: chairMovements,
-    });
-  });
-
-  // Send motor commands for each movement step
   try {
-    for (const chairMovement of movements) {
-      for (const step of chairMovement.movementPath) {
-        const command = determineCommand(step); // Determine motor command based on step
-        const value = calculateMovementValue(step); // Calculate movement value (distance or angle)
-        await sendMotorCommand(command, value); // Send motor command
-      }
+    // Only consider the first chair for movement
+    const currentPosition = currentPositions[0];
+
+    if (!currentPosition) {
+      return res.status(400).json({ error: 'No valid current position provided.' });
+    }
+
+    // Calculate deltas
+    const deltaX = targetPosition.x - currentPosition.x;
+    const deltaY = targetPosition.y - currentPosition.y;
+
+    console.log(`Calculated deltas: X = ${deltaX}, Y = ${deltaY}`);
+
+    // Send motor commands for deltaX and deltaY
+    if (deltaX !== 0) {
+      const commandX = deltaX > 0 ? 'translateRight' : 'translateLeft';
+      const valueX = Math.abs(deltaX);
+      await sendMotorCommand(commandX, valueX);
+    }
+
+    if (deltaY !== 0) {
+      const commandY = deltaY > 0 ? 'moveForward' : 'moveBackward';
+      const valueY = Math.abs(deltaY);
+      await sendMotorCommand(commandY, valueY);
     }
 
     res.json({
-      message: 'Path calculated and motor commands sent successfully.',
-      movements,
+      message: 'Motor commands sent successfully.',
+      deltaX,
+      deltaY,
     });
   } catch (error) {
     console.error('Error sending motor commands:', error);
@@ -392,7 +369,7 @@ router.post('/calculate-path', async (req, res) => {
 
 // Helper function to determine motor command
 const determineCommand = (step) => {
-  // Logic to determine motor command (e.g., moveForward, rotateClockwise)
+  // Determine motor command based on step direction
   if (Math.abs(step.x) > Math.abs(step.y)) {
     return step.x > 0 ? 'translateRight' : 'translateLeft';
   } else {
@@ -402,14 +379,14 @@ const determineCommand = (step) => {
 
 // Helper function to calculate movement value
 const calculateMovementValue = (step) => {
-  return Math.sqrt(step.x * step.x + step.y * step.y); // Calculate Euclidean distance
+  // Calculate magnitude of movement
+  return Math.sqrt(step.x * step.x + step.y * step.y);
 };
 
 // Helper function to send motor command via WebSocket
 const sendMotorCommand = async (command, value) => {
-  const module = 'motors';
   const fullCommand = `${command},${value}`;
-  sendCommandToESP32(fullCommand); // Use WebSocket function
+  sendCommandToESP32(fullCommand); // Send the command to the ESP32 via WebSocket
   console.log(`Command sent to ESP32: ${fullCommand}`);
 };
 
