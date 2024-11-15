@@ -319,7 +319,7 @@ void translateLeft(int steps) {
 
   digitalWrite(DIRFL, HIGH);
   digitalWrite(DIRRL, LOW);
-  digitalWrite(DIRFR, HIGH;
+  digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, LOW);
 
   if(steps < 61){
