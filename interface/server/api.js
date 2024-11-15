@@ -172,7 +172,6 @@ router.get('/load-configuration/:layoutId', async (req, res) => {
   }
 });
 
-// Simulate movement from Layout 1 to Layout 2 using APF
 router.post('/move-to-layout', (req, res) => {
   const { layout1Items, layout2Items, obstacles } = req.body;
 
@@ -203,7 +202,9 @@ router.post('/move-to-layout', (req, res) => {
       movementPath.push(currentPosition);
     }
 
+    // Add anchorId to each movement
     return {
+      anchorId: `chair${index + 1}`, // Ensure it matches the chairIPMap
       chairIndex: index + 1,
       movementPath,
     };
@@ -215,24 +216,43 @@ router.post('/move-to-layout', (req, res) => {
   });
 });
 
-// Endpoint to send commands with command and value fields to ESP32 via WebSocket
+
 router.post('/send-command', (req, res) => {
-  const { command, value } = req.body;
+  const { anchorId, command, value } = req.body;
 
   // Validate required fields
-  if (!command) {
-    return res.status(400).json({ error: 'Command is required' });
+  if (!command || !anchorId) {
+    return res.status(400).json({ error: 'Command and anchorId are required' });
   }
 
-  // Construct the message format
-  const fullCommand = value !== undefined
-    ? `${command},${value}` // Include value if provided
-    : `${command},0`;       // Default to "0" for value if undefined
+  // Map chair IDs to IP addresses (you can replace this with dynamic logic or database lookups)
+  const chairIPMap = {
+    chair1: '192.168.4.3',
+    chair2: '192.168.4.4',
+  };
 
-  sendCommandToESP32(fullCommand); // Send the message to ESP32
-  console.log(`Command sent to ESP32: ${fullCommand}`);
-  res.json({ message: `Command '${fullCommand}' sent to ESP32.` });
+  const chairIP = chairIPMap[anchorId];
+
+  if (!chairIP) {
+    return res.status(400).json({ error: `Unknown anchorId: ${anchorId}` });
+  }
+
+/*// Construct the full command
+  const fullCommand = value !== undefined
+    ? `${command} ${anchorId} ${value}` // Include chair ID and value
+    : `${command} ${anchorId} 0`;      // Default to "0" for value if undefined*/
+    const fullCommand = value !== undefined
+  ? `${anchorId} ${command} ${value}` // Format as id-movement-value
+  : `${anchorId} ${command} 0`;       // Default to "0" for value if undefined
+
+
+  // Send the command to the ESP32 device
+  sendCommandToESP32(fullCommand, chairIP); // Ensure sendCommandToESP32 handles the target IP
+  console.log(`Command sent to ${anchorId} (${chairIP}): ${fullCommand}`);
+
+  res.json({ message: `Command '${fullCommand}' sent to ${anchorId} (${chairIP}).` });
 });
+
 
 // Endpoint to store current chair positions sent by anchors
 router.post('/store-current-chair-poss', async (req, res) => {

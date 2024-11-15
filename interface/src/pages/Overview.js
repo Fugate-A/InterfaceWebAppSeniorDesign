@@ -4,6 +4,7 @@ import './Overview.css'; // Ensure you have styles for the layout
 const Overview = () => {
   const [layouts, setLayouts] = useState([]);
   const [selectedLayout, setSelectedLayout] = useState(null); // Holds the selected layout details
+  const [selectedChair, setSelectedChair] = useState(''); // Chair selection
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState(''); // For success messages
   const [distance, setDistance] = useState(''); // Distance input
@@ -12,6 +13,9 @@ const Overview = () => {
   const fetchLayouts = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/load-layouts`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch layouts');
+      }
       const data = await response.json();
       setLayouts(data.layouts);
     } catch (error) {
@@ -35,7 +39,7 @@ const Overview = () => {
           throw new Error('Network response was not ok');
         }
         const layout = await response.json();
-        console.log("Selected Layout Data:", layout);
+        console.log('Selected Layout Data:', layout);
         setSelectedLayout(layout); // Set selected layout data
         setErrorMessage(''); // Clear any previous error message
       } catch (error) {
@@ -45,37 +49,52 @@ const Overview = () => {
     }
   };
 
+  // Handle selecting a chair
+  const handleChairSelection = (event) => {
+    setSelectedChair(event.target.value); // Update the selected chair
+    setErrorMessage(''); // Clear any previous error messages
+  };
+
   // Generic function to handle motor commands
   const handleMotorCommand = async (command) => {
     try {
-        const module = "motors"; // Specify the module
-        const value = parseInt(distance) || 0; // Parse the distance input as an integer, default to 0 if empty
+      if (!selectedChair) {
+        setErrorMessage('Please select a chair.');
+        return;
+      }
 
-        // Send the module, command, and value fields to the API
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                module,    // Send the module
-                command,   // Send the command
-                value,     // Send the value
-            }),
-        });
+      const value = parseInt(distance) || 0; // Parse the distance input as an integer, default to 0 if empty
+      const anchorId = selectedChair.toLowerCase(); // Convert to lowercase to match the backend keys
 
-        if (response.ok) {
-            setSuccessMessage(`${command} command sent successfully.`);
-        } else {
-            const errorResponse = await response.json();
-            console.error('Error response:', errorResponse);
-            throw new Error(`Failed to send ${command} command`);
-        }
+      if (!['chair1', 'chair2'].includes(anchorId)) {
+        throw new Error(`Invalid chair ID: ${selectedChair}`);
+      }
+
+      // Send the chair ID (anchorId), command, and value fields to the API
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          anchorId, // Pass the lowercase anchorId
+          command,  // Pass the command
+          value,    // Pass the value
+        }),
+      });
+
+      if (response.ok) {
+        setSuccessMessage(`${command} command sent successfully to ${selectedChair}.`);
+      } else {
+        const errorResponse = await response.json();
+        console.error('Error response:', errorResponse);
+        setErrorMessage(errorResponse.error || `Failed to send ${command} command.`);
+      }
     } catch (error) {
-        console.error(`Error sending ${command} command:`, error);
-        setErrorMessage(`Failed to send ${command} command. Please try again.`);
+      console.error(`Error sending ${command} command:`, error);
+      setErrorMessage(`Failed to send ${command} command. Please try again.`);
     }
-};
+  };
 
   return (
     <div>
@@ -94,6 +113,16 @@ const Overview = () => {
           </option>
         ))}
       </select>
+
+      {/* Dropdown for selecting a chair */}
+      <div>
+        <label htmlFor="chair-select">Select Chair:</label>
+        <select id="chair-select" onChange={handleChairSelection} value={selectedChair}>
+          <option value="">--Select a Chair--</option>
+          <option value="chair1">Chair 1 (192.168.4.3)</option>
+          <option value="chair2">Chair 2 (192.168.4.4)</option>
+        </select>
+      </div>
 
       {/* Input box for distance or degree */}
       <div>

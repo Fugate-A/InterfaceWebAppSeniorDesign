@@ -104,7 +104,7 @@ void translateRight(int steps) {
 
 void translateLeft(int steps) {
   
-  Serial.print("Translating right for ");
+  Serial.print("Translating left for ");
   Serial.print(steps);
   Serial.println(" steps");
 
