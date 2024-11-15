@@ -11,6 +11,7 @@ const AutoMove = () => {
 
   const demoRoomWidthMeters = parseFloat(process.env.REACT_APP_DRW) || 3;
   const scaleFactor = 200;
+  const stepsPerMeter = 100; // Define the number of steps required per meter
   const areaWidthPx = demoRoomWidthMeters * scaleFactor;
   const areaHeightPx = demoRoomWidthMeters * scaleFactor;
 
@@ -71,6 +72,22 @@ const AutoMove = () => {
     setTargetPosition({ x, y });
     setSuccessMessage(`Target position set: X: ${x.toFixed(2)}m, Y: ${y.toFixed(2)}m`);
     setErrorMessage("");
+  };
+
+  const calculateSteps = () => {
+    if (!tagPosition || !targetPosition) {
+      setErrorMessage("Both tag position and target position are required.");
+      return;
+    }
+
+    const deltaX = targetPosition.x - tagPosition.x;
+    const deltaY = targetPosition.y - tagPosition.y;
+
+    const stepsX = Math.round(deltaX * stepsPerMeter);
+    const stepsY = Math.round(deltaY * stepsPerMeter);
+
+    console.log(`Steps required: X = ${stepsX}, Y = ${stepsY}`);
+    setSuccessMessage(`Calculated steps: X = ${stepsX}, Y = ${stepsY}`);
   };
 
   return (
@@ -135,7 +152,7 @@ const AutoMove = () => {
           ></div>
         )}
       </div>
-      <button onClick={() => console.log("Movement started!")}>Start Movement</button>
+      <button onClick={calculateSteps}>Calculate Steps</button>
     </div>
   );
 };
