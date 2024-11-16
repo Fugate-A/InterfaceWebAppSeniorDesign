@@ -1,0 +1,10 @@
+- chair 1 down - 1965
+- chair 2 up - 1965
+- chair 1 right - 655
+- chair 2 left - 655
+- chair 1 up - 950
+- chair 2 down - 950
+- chair 1 left - 655 
+- chair 2 right - 655
+- chair 1 up - 1310
+- chair 2 down - 1310

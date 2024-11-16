@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 import './Recon.css'; // Ensure that you have basic styles for the recon page
 
 const Recon = () => {
+  // Global scaling factors
+  const STEPS_PER_METER = 655; // Steps for 1 meter
+  const STEPS_PER_ROTATION = 1625; // Steps for 360° rotation
+  const BOUNDARY_WIDTH = 500; // Virtual boundary width (e.g., 1000px)
+  const REAL_WORLD_WIDTH = 3; // Real-world width in meters
+
+  const pixelToMeter = REAL_WORLD_WIDTH / BOUNDARY_WIDTH;
+
   // Chair IP mapping
   const chairIPMap = {
     chair1: '192.168.4.3',
@@ -9,16 +17,21 @@ const Recon = () => {
   };
 
   const [layouts, setLayouts] = useState([]);
-  const [selectedLayout, setSelectedLayout] = useState(null); // current layout
-  const [desiredLayout, setDesiredLayout] = useState(null); // State for desired layout
-  const [movementData, setMovementData] = useState(null); // To store movement data from the API
+  const [selectedLayout, setSelectedLayout] = useState(null); // Current layout
+  const [desiredLayout, setDesiredLayout] = useState(null); // Desired layout
   const [currentPositions, setCurrentPositions] = useState([]); // Positions for animation
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [atFinalLayout, setAtFinalLayout] = useState(false); // Track when chairs reach the final layout
   const [reconFinished, setReconFinished] = useState(false); // Track when reconfiguration is finished
 
-  // Function to fetch layouts
+  // Scale pixel coordinates to real-world meters
+  const scaleToMeters = (value) => (value / BOUNDARY_WIDTH) * REAL_WORLD_WIDTH;
+
+  // Scale meters back to pixels for visualization
+  const scaleToPixels = (value) => (value / REAL_WORLD_WIDTH) * BOUNDARY_WIDTH;
+
+  // Fetch layouts from the backend
   const fetchLayouts = async () => {
     setLoading(true);
     try {
@@ -27,7 +40,17 @@ const Recon = () => {
         throw new Error('Failed to fetch layouts');
       }
       const data = await response.json();
-      setLayouts(data.layouts);
+
+      // Scale database-stored positions to match the boundary
+      const scaledLayouts = data.layouts.map((layout) => ({
+        ...layout,
+        items: layout.items.map((item) => ({
+          ...item,
+          x: scaleToPixels(item.x),
+          y: scaleToPixels(item.y),
+        })),
+      }));
+      setLayouts(scaledLayouts);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching layouts:', error);
@@ -36,25 +59,23 @@ const Recon = () => {
     }
   };
 
-  // Load layouts on component mount
   useEffect(() => {
     fetchLayouts();
   }, []);
 
-  // Handle selecting a layout
+  // Handle layout selection
   const handleLayoutSelection = (event) => {
     const layoutId = event.target.value;
     if (layoutId) {
       const layout = layouts.find((layout) => layout._id === layoutId);
       setSelectedLayout(layout);
-      setCurrentPositions(layout.items || []); // Initialize current positions, handle undefined items
+      setCurrentPositions(layout.items || []); // Initialize current positions
     } else {
       setSelectedLayout(null);
-      setCurrentPositions([]); // Clear positions if no layout is selected
+      setCurrentPositions([]);
     }
   };
 
-  // Handle selecting a desired layout
   const handleDesiredLayoutSelection = (event) => {
     const layoutId = event.target.value;
     if (layoutId) {
@@ -65,7 +86,7 @@ const Recon = () => {
     }
   };
 
-  // Function to handle reconfiguration and fetch movement data
+  // Handle reconfiguration
   const handleReconfigure = async () => {
     if (!selectedLayout || !desiredLayout) {
       alert('Please select both a current layout and a desired layout.');
@@ -79,9 +100,17 @@ const Recon = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          layout1Items: selectedLayout.items || [],
-          layout2Items: desiredLayout.items || [],
-          obstacles: [], // Add obstacles if any (currently none)
+          layout1Items: selectedLayout.items.map((item) => ({
+            ...item,
+            x: scaleToMeters(item.x),
+            y: scaleToMeters(item.y),
+          })),
+          layout2Items: desiredLayout.items.map((item) => ({
+            ...item,
+            x: scaleToMeters(item.x),
+            y: scaleToMeters(item.y),
+          })),
+          obstacles: [],
         }),
       });
 
@@ -92,8 +121,7 @@ const Recon = () => {
       const result = await moveResponse.json();
 
       if (result.movements) {
-        setMovementData(result.movements); // Store movement paths
-        animateChairs(result.movements); // Start animating the chairs
+        animateChairs(result.movements); // Start animating chairs
       } else {
         console.error('No movement data returned from the server.');
         alert('Error: No movement data returned.');
@@ -104,14 +132,13 @@ const Recon = () => {
     }
   };
 
-  // Function to send movement commands to a specific chair
-  const sendMovementCommand = async (anchorId, command, value) => {
+  // Send movement command to a specific chair
+  const sendMovementCommand = async (anchorId, command, steps) => {
     try {
       if (!anchorId) {
         throw new Error("anchorId is undefined. Command not sent.");
       }
 
-      //const chairIP = chairIPMap[anchorId];
       const chairIP = chairIPMap[anchorId.toLowerCase()]; // Normalize to lowercase
       if (!chairIP) {
         throw new Error(`Unknown anchorId: ${anchorId}`);
@@ -122,14 +149,14 @@ const Recon = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ anchorId, command, value }), // Include the chair's ID
+        body: JSON.stringify({ anchorId, command, value: steps }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to send command to ${anchorId}: ${errorText}`);
       } else {
-        console.log(`Command sent to ${anchorId}: ${command}, ${value}`);
+        console.log(`Command sent to ${anchorId}: ${command}, ${steps}`);
       }
     } catch (error) {
       console.error(error.message);
@@ -141,61 +168,65 @@ const Recon = () => {
       console.error('No valid movement data provided.');
       return;
     }
-  
-    // Loop through all chairs
-    movements.forEach(async (movement, chairIndex) => {
-      if (!movement || !movement.movementPath || !movement.anchorId) {
-        console.error(`Invalid movement data for chair at index ${chairIndex}`);
+
+    movements.forEach(async (movement, index) => {
+      if (!movement || !movement.anchorId || !movement.movementPath) {
+        console.error(`Invalid movement data for chair at index ${index}`);
         return;
       }
-  
+
       const { anchorId, movementPath } = movement;
-  
-      // Calculate the total delta for x and y directions
-      const totalDeltaX = movementPath[movementPath.length - 1].x - movementPath[0].x;
-      const totalDeltaY = movementPath[movementPath.length - 1].y - movementPath[0].y;
-  
-      // Send commands only once for the total movement in each direction
+      const totalDeltaX =
+        (movementPath[movementPath.length - 1].x - movementPath[0].x) * pixelToMeter;
+      const totalDeltaY =
+        (movementPath[movementPath.length - 1].y - movementPath[0].y) * pixelToMeter;
+      const totalRotation =
+        movementPath[movementPath.length - 1].rotation - movementPath[0].rotation;
+
       try {
         if (totalDeltaX !== 0) {
           const commandX = totalDeltaX > 0 ? 'translateRight' : 'translateLeft';
-          await sendMovementCommand(anchorId, commandX, Math.abs(totalDeltaX) * 655);
+          const stepsX = Math.abs(totalDeltaX) * STEPS_PER_METER;
+          await sendMovementCommand(anchorId, commandX, Math.round(stepsX));
         }
-  
+
         if (totalDeltaY !== 0) {
           const commandY = totalDeltaY > 0 ? 'moveForward' : 'moveBackward';
-          await sendMovementCommand(anchorId, commandY, Math.abs(totalDeltaY) * 655);
+          const stepsY = Math.abs(totalDeltaY) * STEPS_PER_METER;
+          await sendMovementCommand(anchorId, commandY, Math.round(stepsY));
         }
-  
-        // Update chair's final position in the frontend
+
+        if (totalRotation !== 0) {
+          const commandRotation =
+            totalRotation > 0 ? 'rotateClockwise' : 'rotateCounterClockwise';
+          const stepsRotation =
+            Math.abs(totalRotation) * (STEPS_PER_ROTATION / 360);
+          await sendMovementCommand(anchorId, commandRotation, Math.round(stepsRotation));
+        }
+
         setCurrentPositions((prevPositions) => {
           const updatedPositions = [...prevPositions];
-          updatedPositions[chairIndex] = movementPath[movementPath.length - 1];
+          updatedPositions[index] = movementPath[movementPath.length - 1];
           return updatedPositions;
         });
-  
-        console.log(`Movement for chair ${anchorId} completed.`);
       } catch (error) {
         console.error(`Error sending movement commands for chair ${anchorId}:`, error);
       }
     });
-  
-    // Once all chairs are done moving, check their positions
+
     checkIfAllChairsAtFinalPosition();
   };
-    
 
-  // Function to check if all chairs have reached their final position
   const checkIfAllChairsAtFinalPosition = () => {
     if (
       currentPositions.every(
         (pos, index) =>
-          calculateDistance(pos, desiredLayout.items[index]) < 1 &&
-          pos.rotation === desiredLayout.items[index].rotation
+          calculateDistance(pos, desiredLayout.items[index]) < 0.01 &&
+          Math.abs(pos.rotation - desiredLayout.items[index].rotation) < 1
       )
     ) {
-      setAtFinalLayout(true); // Mark as at final layout when all chairs have reached their target
-      setReconFinished(true); // Mark reconfiguration as finished
+      setAtFinalLayout(true);
+      setReconFinished(true);
       console.log('Reconfiguration complete.');
     }
   };
@@ -215,9 +246,6 @@ const Recon = () => {
         className="reconfigure-button"
         onClick={handleReconfigure}
         disabled={!selectedLayout || !desiredLayout}
-        style={{
-          backgroundColor: selectedLayout && desiredLayout ? 'red' : '', // Change button color to red when both layouts are selected
-        }}
       >
         Reconfigure
       </button>
@@ -252,22 +280,21 @@ const Recon = () => {
           </select>
 
           <div className="layout-display">
-            {currentPositions.length > 0 &&
-              currentPositions.map((item, index) =>
-                item && item.x !== undefined && item.y !== undefined ? (
-                  <div
-                    key={index}
-                    className="chair"
-                    style={{
-                      transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation || 0}deg)`,
-                      position: 'absolute',
-                      transition: 'transform 0.1s ease-out',
-                    }}
-                  >
-                    Chair {index + 1} (x: {item.x}, y: {item.y}, rotation: {item.rotation}°)
-                  </div>
-                ) : null
-              )}
+            {currentPositions.map((item, index) =>
+              item && item.x !== undefined && item.y !== undefined ? (
+                <div
+                  key={index}
+                  className="chair"
+                  style={{
+                    transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation || 0}deg)`,
+                    position: 'absolute',
+                    transition: 'transform 0.1s ease-out',
+                  }}
+                >
+                  Chair {index + 1} (x: {item.x}, y: {item.y}, rotation: {item.rotation}°)
+                </div>
+              ) : null
+            )}
           </div>
         </>
       )}
