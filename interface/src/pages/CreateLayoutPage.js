@@ -112,64 +112,88 @@ const CreateLayoutPage = () => {
         onChange={(e) => setName(e.target.value)}
         placeholder="Layout Name"
       />
-      <div className="layout-boundary-section">
-        <div className="boundary">
-          <div className="grid-container">
-            {boxes.map(({ id, x, y, width, height, rotation }) => (
-              <div
-                key={id}
-                className={`box-container box-${id}`}
-                style={{
-                  position: 'absolute',
-                  left: x - width / 2,
-                  top: y - height / 2,
-                  width: `${width}px`,
-                  height: `${height}px`,
-                  transform: `rotate(${rotation}deg)`,
-                  transformOrigin: 'center center',
-                }}
-              >
-                <Moveable
-                  target={`.box-${id}`}
-                  draggable={true}
-                  rotatable={true}
-                  throttleDrag={0}
-                  throttleRotate={0}
-                  onDrag={({ left, top }) => handleDrag(id, { left, top })}
-                  onRotate={({ rotate }) => handleRotate(id, { rotate })}
-                />
-                <div className="box">Box #{id}</div>
-              </div>
-            ))}
-          </div>
+      <div
+  className="layout-boundary-section"
+  style={{
+    display: "flex",
+    justifyContent: "center", // Centers horizontally
+    alignItems: "center", // Centers vertically
+    height: "100%", // Ensures it takes full container height
+  }}
+>
+  <div
+    className="boundary"
+    style={{
+      width: "400px", // Match the boundary width to other pages
+      height: "400px", // Match the boundary height to other pages
+      border: "2px dashed #ccc",
+      borderRadius: "10px",
+      margin: "20px 0",
+      backgroundColor: "#f9f9f9",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      overflow: "hidden",
+      position: "relative", // Ensures boxes are contained
+    }}
+  >
+    <div className="grid-container">
+      {boxes.map(({ id, x, y, width, height, rotation }) => (
+        <div
+          key={id}
+          className={`box-container box-${id}`}
+          style={{
+            position: "absolute",
+            left: x - width / 2,
+            top: y - height / 2,
+            width: `${width}px`,
+            height: `${height}px`,
+            transform: `rotate(${rotation}deg)`,
+            transformOrigin: "center center",
+          }}
+        >
+          <Moveable
+            target={`.box-${id}`}
+            draggable={true}
+            rotatable={true}
+            throttleDrag={0}
+            throttleRotate={0}
+            onDrag={({ left, top }) => handleDrag(id, { left, top })}
+            onRotate={({ rotate }) => handleRotate(id, { rotate })}
+          />
+          <div className="box">Box #{id}</div>
         </div>
-        <div className="layout-controls">
-          <div className="layout-stats">
-            <h2>{name || 'Untitled Layout'}</h2>
-            <ul>
-              {boxes.map(({ id, x, y, rotation }) => (
-                <li key={id}>
-                  Box #{id}: x={x}px, y={y}px, rotation=
-                  <input
-                    type="number"
-                    value={rotation}
-                    onChange={(e) => handleRotationInputChange(id, e.target.value)}
-                    step="5"
-                    min="0"
-                    max="360"
-                  />
-                  °
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="button-row">
-            <button onClick={handleAddBox}>Add Box</button>
-            <button onClick={handleSaveLayout}>Save Layout</button>
-            {confirmationMessage && <p className="confirmation-message">{confirmationMessage}</p>}
-          </div>
-        </div>
-      </div>
+      ))}
+    </div>
+  </div>
+  <div className="layout-controls">
+    <div className="layout-stats">
+      <h2>{name || "Untitled Layout"}</h2>
+      <ul>
+        {boxes.map(({ id, x, y, rotation }) => (
+          <li key={id}>
+            Box #{id}: x={x}px, y={y}px, rotation=
+            <input
+              type="number"
+              value={rotation}
+              onChange={(e) => handleRotationInputChange(id, e.target.value)}
+              step="5"
+              min="0"
+              max="360"
+            />
+            °
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div className="button-row">
+      <button onClick={handleAddBox}>Add Box</button>
+      <button onClick={handleSaveLayout}>Save Layout</button>
+      {confirmationMessage && (
+        <p className="confirmation-message">{confirmationMessage}</p>
+      )}
+    </div>
+  </div>
+</div>
+
     </div>
   );
 };

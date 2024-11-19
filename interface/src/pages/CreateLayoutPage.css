@@ -1,140 +1,108 @@
 /* General container styling */
 .create-layout-container {
-    padding: 20px;
-    text-align: center;
-    font-family: 'Arial', sans-serif;
-    color: #333;
+  padding: 20px;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  color: #333;
 }
 
 .create-layout-container h1 {
-    font-size: 2rem;
-    color: #6200ea;
-    margin-bottom: 20px;
+  font-size: 2rem;
+  color: #6200ea;
+  margin-bottom: 20px;
 }
 
 .create-layout-container input[type="text"] {
-    padding: 10px;
-    font-size: 1rem;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 300px;
+  padding: 10px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 300px;
 }
 
-/* Layout section: boundary and controls aligned horizontally */
-.layout-boundary-section {
-    display: flex;
-    justify-content: space-between; /* Ensure boundary and controls are spaced evenly */
-    gap: 20px;
-    align-items: flex-start; /* Align the top edges of the boundary and controls */
-    margin: 0 auto;
-    width: 900px; /* Restrict total width to prevent overflowing */
-}
-
-/* Boundary for the layout area */
-.boundary {
-    position: relative;
-    width: 400px; /* Reduce size */
-    height: 400px; /* Reduce size */
-    border: 2px dashed #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-/* Box styles inside the boundary */
-.box-container {
-    position: absolute;
-    background-color: #4caf50;
-    border: 2px solid #388e3c;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    cursor: grab;
-    transition: transform 0.2s ease;
-}
-
-.box-container:hover {
-    background-color: #388e3c;
-}
-
-/* Controls section: stats and buttons */
-.layout-controls {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 400px; /* Match boundary height */
-    max-width: 300px; /* Ensure controls fit well */
-    align-items: center;
-}
-
-/* Layout stats for the list of boxes */
-.layout-stats {
-    text-align: left;
-    width: 100%;
-}
-
-.layout-stats h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #4caf50;
-}
-
-.layout-stats ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-.layout-stats li {
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.layout-stats input {
-    width: 60px;
-    padding: 5px;
-    font-size: 0.9rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: center;
-}
-
-/* Buttons positioned at the bottom */
-.button-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: auto; /* Push buttons to the bottom */
-}
-
-/* Buttons */
 .create-layout-container button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #6200ea;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 150px; /* Uniform button size */
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin: 10px 5px;
+  color: #fff;
+  background-color: #6200ea;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .create-layout-container button:hover {
-    background-color: #3700b3;
+  background-color: #3700b3;
 }
 
-/* Confirmation message styling */
-.confirmation-message {
-    font-size: 1rem;
-    color: #6200ea;
-    margin-top: 10px;
-    text-align: center;
+.boundary {
+  position: relative;
+  width: 500px; /* Match the boundary size with other pages */
+  height: 500px; /* Match the boundary size with other pages */
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Style for individual boxes */
+.box-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  background-color: #4caf50;
+  border: 2px solid #388e3c;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.box-container:hover {
+  background-color: #388e3c;
+}
+
+.box {
+  pointer-events: none; /* Prevent interaction with inner content */
+}
+
+/* Coordinates section for each box */
+.coordinates {
+  margin-top: 20px;
+}
+
+.position-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.position-line input {
+  width: 60px;
+  padding: 5px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.position-line span {
+  font-weight: bold;
+}
+
+/* Grid container for the boxes */
+.grid-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
