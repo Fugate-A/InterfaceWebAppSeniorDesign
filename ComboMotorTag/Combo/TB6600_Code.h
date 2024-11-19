@@ -11,5 +11,6 @@ void translateRight(int steps);
 void rotateClockwise(int steps);
 void rotateCounterClockwise(int steps);
 void setupMotor();
+void estopMotors( bool mode );
 
 #endif
