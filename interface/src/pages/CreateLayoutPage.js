@@ -1,22 +1,26 @@
 import React, { useState, useCallback } from 'react';
 import Moveable from 'react-moveable';
-import '../components/Overview.css';
+import './CreateLayoutPage.css';
 
 const CreateLayoutPage = () => {
   const [boxes, setBoxes] = useState([]);
   const [name, setName] = useState('');
+  const [confirmationMessage, setConfirmationMessage] = useState('');
 
   const apiUrl = process.env.REACT_APP_API_URL; // Use the environment variable
 
   const handleAddBox = () => {
-    setBoxes([...boxes, {
-      id: boxes.length + 1,
-      x: 100, // Default x position
-      y: 100, // Default y position
-      width: 100,
-      height: 100,
-      rotation: 0
-    }]);
+    setBoxes([
+      ...boxes,
+      {
+        id: boxes.length + 1,
+        x: 100, // Default x position
+        y: 100, // Default y position
+        width: 100,
+        height: 100,
+        rotation: 0,
+      },
+    ]);
   };
 
   const handleDrag = useCallback((id, { left, top }) => {
@@ -62,16 +66,16 @@ const CreateLayoutPage = () => {
 
   const handleSaveLayout = () => {
     if (!apiUrl) {
-      console.error("API URL is undefined. Please check your environment variables.");
+      console.error('API URL is undefined. Please check your environment variables.');
       return;
     }
 
     if (!name.trim()) {
-      console.error("Layout name is required.");
+      console.error('Layout name is required.');
       return;
     }
 
-    const configuration = { layoutName: name, items: boxes };  // Include layoutName and items
+    const configuration = { layoutName: name, items: boxes }; // Include layoutName and items
     console.log('Saving configuration:', configuration);
 
     fetch(`${apiUrl}/api/save-configuration`, {
@@ -79,7 +83,7 @@ const CreateLayoutPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(configuration),  // Send layoutName and items
+      body: JSON.stringify(configuration), // Send layoutName and items
     })
       .then((response) => {
         if (!response.ok) {
@@ -89,12 +93,18 @@ const CreateLayoutPage = () => {
       })
       .then((data) => {
         console.log('Configuration saved successfully:', data);
+        setConfirmationMessage('Layout saved successfully!');
+        setTimeout(() => setConfirmationMessage(''), 3000); // Hide message after 3 seconds
       })
-      .catch((error) => console.error('Error saving configuration:', error));
+      .catch((error) => {
+        console.error('Error saving configuration:', error);
+        setConfirmationMessage('Failed to save layout.');
+        setTimeout(() => setConfirmationMessage(''), 3000);
+      });
   };
 
   return (
-    <div className="overview-container">
+    <div className="create-layout-container">
       <h1>Create New Layout</h1>
       <input
         type="text"
@@ -102,65 +112,64 @@ const CreateLayoutPage = () => {
         onChange={(e) => setName(e.target.value)}
         placeholder="Layout Name"
       />
-      <button onClick={handleAddBox}>Add Box</button>
-      <div className="boundary">
-        <div className="grid-container">
-          {boxes.map(({ id, x, y, width, height, rotation }) => (
-            <div
-              key={id}
-              className={`box-container box-${id}`}
-              style={{
-                position: 'absolute',
-                left: x - width / 2,
-                top: y - height / 2,
-                width: `${width}px`,
-                height: `${height}px`,
-                transform: `rotate(${rotation}deg)`,
-                transformOrigin: 'center center',
-                backgroundColor: 'lightgray',
-                border: '1px solid #333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'grab',
-                boxSizing: 'border-box',
-              }}
-            >
-              <Moveable
-                target={`.box-${id}`}
-                draggable={true}
-                rotatable={true}
-                throttleDrag={0}
-                throttleRotate={0}
-                onDrag={({ target, left, top }) => handleDrag(id, { left, top })}
-                onRotate={({ target, rotate }) => handleRotate(id, { rotate })}
-                edge={false} // Disable resize handles
-                keepRatio={false} // Ensure resizing doesn't keep the aspect ratio
-              />
-              <div className="box">Box #{id}</div>
-            </div>
-          ))}
+      <div className="layout-boundary-section">
+        <div className="boundary">
+          <div className="grid-container">
+            {boxes.map(({ id, x, y, width, height, rotation }) => (
+              <div
+                key={id}
+                className={`box-container box-${id}`}
+                style={{
+                  position: 'absolute',
+                  left: x - width / 2,
+                  top: y - height / 2,
+                  width: `${width}px`,
+                  height: `${height}px`,
+                  transform: `rotate(${rotation}deg)`,
+                  transformOrigin: 'center center',
+                }}
+              >
+                <Moveable
+                  target={`.box-${id}`}
+                  draggable={true}
+                  rotatable={true}
+                  throttleDrag={0}
+                  throttleRotate={0}
+                  onDrag={({ left, top }) => handleDrag(id, { left, top })}
+                  onRotate={({ rotate }) => handleRotate(id, { rotate })}
+                />
+                <div className="box">Box #{id}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="layout-controls">
+          <div className="layout-stats">
+            <h2>{name || 'Untitled Layout'}</h2>
+            <ul>
+              {boxes.map(({ id, x, y, rotation }) => (
+                <li key={id}>
+                  Box #{id}: x={x}px, y={y}px, rotation=
+                  <input
+                    type="number"
+                    value={rotation}
+                    onChange={(e) => handleRotationInputChange(id, e.target.value)}
+                    step="5"
+                    min="0"
+                    max="360"
+                  />
+                  °
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="button-row">
+            <button onClick={handleAddBox}>Add Box</button>
+            <button onClick={handleSaveLayout}>Save Layout</button>
+            {confirmationMessage && <p className="confirmation-message">{confirmationMessage}</p>}
+          </div>
         </div>
       </div>
-      <div className="coordinates">
-        {boxes.map(({ id, x, y, rotation }) => (
-          <div key={id} className="position-line">
-            <p>
-              Box #{id} pos: x: {x}px - y: {y}px - rotation: {rotation}°
-            </p>
-            <input
-              type="number"
-              value={rotation}
-              onChange={(e) => handleRotationInputChange(id, e.target.value)}
-              step="5"
-              min="0"
-              max="360"
-            />
-            <span>°</span>
-          </div>
-        ))}
-      </div>
-      <button onClick={handleSaveLayout}>Save Layout</button>
     </div>
   );
 };
