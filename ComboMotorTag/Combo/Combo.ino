@@ -43,6 +43,17 @@ void handleMotorControl() {
             rotateClockwise(value);
         } else if (action == "rotateCounterClockwise") {
             rotateCounterClockwise(value);
+        } else if (action == "estop") {
+            if( value == 64 )
+            { 
+              estopMotors( false );
+            }
+            
+            else
+            {
+              estopMotors( true );
+            }
+
         } else {
             server.send(400, "application/json", "{\"error\":\"Unknown command\"}");
             return;
