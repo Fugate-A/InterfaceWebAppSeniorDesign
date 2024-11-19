@@ -21,7 +21,7 @@ body, html {
   height: 100%;
 }
 
-/* The header is now sticky at the top and spans the full width */
+/* The header is sticky at the top and spans the full width */
 .App-header {
   background-color: #6200ea;
   color: white;
@@ -110,4 +110,55 @@ body, html {
 
 .nav-link:hover {
   color: #c3cfe2;
+}
+
+/* Layout visualization section */
+.layout-visual {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.layout-container {
+  position: relative;
+  width: 400px; /* Adjust width */
+  height: 400px; /* Adjust height */
+  margin: 0 auto;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  overflow: hidden;
+}
+
+.chair {
+  width: 50px;
+  height: 50px;
+  background-color: #4CAF50;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  position: absolute;
+  transform-origin: center;
+}
+
+/* Responsiveness for smaller screens */
+@media (max-width: 768px) {
+  .main-button {
+    max-width: 100%;
+    padding: 10px 20px;
+  }
+
+  .App-nav ul {
+    flex-direction: column;
+  }
+
+  .App-nav ul li {
+    margin: 10px 0;
+  }
+
+  .layout-container {
+    width: 300px;
+    height: 300px;
+  }
 }
