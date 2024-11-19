@@ -124,7 +124,7 @@ const Overview = () => {
             <option value="chair2">Chair 2 (192.168.4.4)</option>
           </select>
   
-          <label htmlFor="distance-input">Enter Distance/Rotation (inches or degrees):</label>
+          <label htmlFor="distance-input">Enter Distance/Rotation (1m F-B = 655 : 360dgr = 1625):</label>
           <input
             id="distance-input"
             type="number"

@@ -1,0 +1,129 @@
+/* General container styling */
+.layout-list-container {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  }
+  
+  /* Header navigation styling */
+  .nav-links {
+    display: flex;
+    justify-content: space-between;
+    list-style-type: none;
+    padding: 10px 20px;
+    background-color: #6200ea;
+    color: white;
+    margin-bottom: 20px;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    color: #c3cfe2;
+  }
+  
+  .refresh-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #3700b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .refresh-button:hover {
+    background-color: #28008a;
+  }
+  
+  /* Layout grid styling */
+  .layouts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Full-sized boundaries */
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  /* Individual layout boundary container */
+  .layout-boundary {
+    position: relative;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .layout-boundary h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #4caf50;
+  }
+  
+  /* Boundary styling */
+  .boundary {
+    width: 400px; /* Matches the size in the App */
+    height: 400px; /* Matches the size in the App */
+    position: relative;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    overflow: hidden;
+    margin: 0 auto; /* Center the boundary */
+  }
+  
+  /* Chair styling */
+  .chair {
+    width: 50px;
+    height: 50px;
+    background-color: #4CAF50;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    position: absolute;
+    transform-origin: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+  
+  .chair:hover {
+    background-color: #388e3c;
+  }
+  
+  /* No layouts message */
+  .no-layouts-message {
+    color: #888;
+    font-size: 1.2rem;
+    margin-top: 20px;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .layouts-grid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust grid for smaller screens */
+    }
+  
+    .boundary {
+      width: 300px;
+      height: 300px;
+    }
+  
+    .chair {
+      width: 40px;
+      height: 40px;
+      font-size: 0.8rem;
+    }
+  }
+  
