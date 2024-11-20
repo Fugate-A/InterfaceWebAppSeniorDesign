@@ -44,9 +44,29 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>ChairGuru</h1>
-        <p>Your ultimate solution for chair layout management and configuration</p>
-      </header>
+  <h1>
+    <button
+      className="logo-button"
+      onClick={async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/api/danceMode`, {
+            method: 'POST',
+          });
+          if (!response.ok) {
+            throw new Error('Failed to activate dance mode');
+          }
+          console.log('Dance mode activated!');
+        } catch (error) {
+          console.error('Error activating dance mode:', error);
+        }
+      }}
+    >
+      ChairGuru
+    </button>
+  </h1>
+  <p>Your ultimate solution for chair layout management and configuration</p>
+</header>
+
 
       {/* Navigation Links */}
       <nav className="App-nav">
