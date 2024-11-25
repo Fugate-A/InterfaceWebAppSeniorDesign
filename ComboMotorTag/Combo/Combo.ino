@@ -1,4 +1,4 @@
-#include "TagOG.h" // UWB Tag functionality
+//#include "TagOG.h" // UWB Tag functionality
 #include "TB6600_Code.h" // Motor control functionality
 #include <WiFi.h>
 #include <WebServer.h> // For ESP32, ensure this library is available
@@ -72,7 +72,7 @@ void setup() {
 
     // Initialize motor and Tag functionality
     setupMotor();
-    setupTag();
+    //setupTag();
 
     // Define POST route for motor commands
     server.on("/move", HTTP_POST, handleMotorControl);
@@ -86,13 +86,13 @@ void loop() {
     server.handleClient();
 
     // Execute UWB Tag operations
-    loopTag();
+    //loopTag();
 
     // Periodically print location data (no JSON generation)
-    static unsigned long lastPrintTime = 0;
+   /* static unsigned long lastPrintTime = 0;
     if (millis() - lastPrintTime > 5000) { // Print every 5 seconds
         Serial.println("UWB Tag data updated.");
-        print_link(uwb_data); // Print tag data directly
+        //print_link(uwb_data); // Print tag data directly
         lastPrintTime = millis();
-    }
+    }*/
 }

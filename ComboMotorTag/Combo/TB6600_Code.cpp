@@ -4,15 +4,22 @@
 #include "TB6600_Code.h"
 
 // Define motor pins
+
 const int PULFL = 16;
 const int DIRFL = 2;
 const int ENAFL = 15;
+
+
 const int PULRL = 5;
 const int DIRRL = 17;
 const int ENARL = 15;
+
+
 const int PULFR = 22;
 const int DIRFR = 21;
 const int ENAFR = 15;
+
+
 const int PULRR = 14;
 const int DIRRR = 12;
 const int ENARR = 15;
@@ -85,7 +92,7 @@ void translateRight(int steps) {
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < steps - 60; i++) {
+  for (int i = 0; i < steps; i++) {
        digitalWrite(PULFL, HIGH);
       digitalWrite(PULFR, HIGH);
       digitalWrite(PULRL, HIGH);
@@ -113,7 +120,7 @@ void translateLeft(int steps) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, LOW);
     // Constant speed phase
-    for (int i = 0; i < steps - 60; i++) {
+    for (int i = 0; i < steps; i++) {
        digitalWrite(PULFL, HIGH);
       digitalWrite(PULFR, HIGH);
       digitalWrite(PULRL, HIGH);

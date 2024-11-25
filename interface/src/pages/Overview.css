@@ -1,21 +1,169 @@
-/* Overview.css */
+/* Reset margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and page styling */
+body, html {
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+/* Main container for inputs and buttons */
+.overview-container {
+  display: flex;
+  flex-direction: row; /* Align inputs and buttons side by side */
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%; /* Full width */
+  margin-bottom: 10px; /* Reduced spacing below */
+  padding: 10px 20px; /* Add padding */
+}
+
+/* Input fields and labels container */
+.input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px; /* Add spacing between input fields */
+  width: 50%; /* Take up half the width */
+}
+
+/* Shrink dropdowns and input fields */
+select,
+input {
+  width: 200px; /* Further reduced width */
+  padding: 6px; /* Adjust padding */
+  font-size: 0.8rem; /* Adjust font size */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Buttons container */
+.button-container {
+  display: flex;
+  flex-direction: column; /* Stack rows vertically */
+  gap: 10px; /* Add spacing between rows */
+  align-items: flex-start; /* Center align rows */
+  width: 45%; /* Adjusted width for alignment */
+  margin-left: 10px;
+}
+
+/* Button rows */
+.button-row {
+  display: flex;
+  justify-content: center; /* Center align buttons in a row */
+  gap: 10px; /* Add spacing between buttons */
+}
+
+/* Button styling - default purple color */
+button {
+  background-color: #6200ea; /* Purple color */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Button hover effect */
+button:hover {
+  background-color: #3700b3;
+}
+
+button:active {
+  background-color: #28008a;
+}
+
+/* Emergency button styling */
+button.emergency {
+  background-color: #ff4d4d; /* Red for emergency */
+  font-size: 1rem; /* Larger font for emphasis */
+  padding: 10px 20px; /* Larger padding */
+  text-align: center;
+  width: fit-content; /* Compact size */
+}
+
+button.emergency:hover {
+  background-color: #cc0000;
+}
+
+button.emergency:active {
+  background-color: #990000;
+}
+
+/* Layout container styling */
 .layout-container {
-    position: relative;
-    width: 800px;  /* Adjust to fit your layout size */
-    height: 600px; /* Adjust to fit your layout size */
-    border: 1px solid black; /* Optional: to visualize the container */
-  }
-  
-  .chair {
-    width: 50px;
-    height: 50px;
-    background-color: lightblue;
-    border: 1px solid darkblue;
-    display: flex;
-    justify-content: center;
+  position: relative;
+  width: 100%; /* Full width */
+  height: 400px; /* Maintain height */
+  margin-top: 10px; /* Reduce spacing from inputs/buttons */
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Prevent scrolling inside the box */
+}
+
+/* Chair elements */
+.chair {
+  width: 50px;
+  height: 50px;
+  background-color: #4CAF50;
+  border: 1px solid #388e3c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform-origin: center;
+  position: absolute;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.chair:hover {
+  background-color: #388e3c;
+  cursor: pointer;
+}
+
+.chair:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 900px) {
+  .overview-container {
+    flex-direction: column; /* Stack inputs and buttons vertically */
     align-items: center;
-    font-size: 14px;
-    color: darkblue;
-    transform-origin: center; /* Ensures the rotation happens around the center */
   }
-  
+
+  .input-container,
+  .button-container {
+    width: 100%; /* Take full width on smaller screens */
+  }
+
+  .layout-container {
+    height: 350px; /* Adjust height */
+  }
+
+  .chair {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
+
+  button {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}

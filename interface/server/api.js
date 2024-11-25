@@ -409,6 +409,52 @@ const sendMotorCommand = async (command, value) => {
   sendCommandToESP32(fullCommand); // Send the command to the ESP32 via WebSocket
   console.log(`Command sent to ESP32: ${fullCommand}`);
 };
+router.post('/danceMode', async (req, res) => {
+  const commands = [
+    { command: 'moveForward', value: 327 },
+    { command: 'moveBackward', value: 327 },
+    { command: 'rotateCounterClockwise', value: 2031 },
+    { command: 'moveForward', value: 655 },
+    { command: 'moveBackward', value: 655 },
+    { command: 'rotateClockwise', value: 2437 },
+    { command: 'moveForward', value: 655 },
+    { command: 'moveBackward', value: 655 },
+    { command: 'rotateCounterClockwise', value: 2031 },
+    { command: 'moveBackward', value: 327 },
+    { command: 'moveForward', value: 327 },
+  ];
+
+  const chairIds = ['chair1', 'chair2']; // Define the chairs
+
+  try {
+    console.log('Dance mode activated: Starting interleaved command sequence.');
+
+    for (const { command, value } of commands) {
+      for (const chairId of chairIds) {
+        const chairCommand = { anchorId: chairId, command, value };
+        console.log(`Sending command to ${chairId}:`, chairCommand);
+
+        // Send the command to the chair
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/send-command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(chairCommand),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to send command '${command}' to ${chairId}`);
+        }
+
+        console.log(`Command '${command}' sent successfully to ${chairId}.`);
+      }
+    }
+
+    res.json({ message: 'Dance mode commands executed successfully in an interleaved manner.' });
+  } catch (error) {
+    console.error('Error in dance mode:', error);
+    res.status(500).json({ error: 'Failed to execute dance mode commands.' });
+  }
+});
 
 
 module.exports = router;

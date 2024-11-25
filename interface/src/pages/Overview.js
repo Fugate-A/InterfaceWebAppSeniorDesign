@@ -99,61 +99,65 @@ const Overview = () => {
   return (
     <div>
       <h1>Layout Overview</h1>
-
+  
       {/* Display error or success messages */}
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+  
+      {/* Inputs and Buttons side by side */}
+      <div className="overview-container">
+        <div className="input-container">
+          <label htmlFor="layout-select">Choose a layout:</label>
+          <select id="layout-select" onChange={handleLayoutSelection}>
+            <option value="">--Select a layout--</option>
+            {layouts.map((layout) => (
+              <option key={layout._id} value={layout._id}>
+                {layout.layoutName || 'Untitled Layout'}
+              </option>
+            ))}
+          </select>
+  
+          <label htmlFor="chair-select">Select Chair:</label>
+          <select id="chair-select" onChange={handleChairSelection} value={selectedChair}>
+            <option value="">--Select a Chair--</option>
+            <option value="chair1">Chair 1 (192.168.4.3)</option>
+            <option value="chair2">Chair 2 (192.168.4.4)</option>
+          </select>
+  
+          <label htmlFor="distance-input">Enter Distance/Rotation (1m F-B = 655 : 360dgr = 1625):</label>
+          <input
+            id="distance-input"
+            type="number"
+            value={distance}
+            onChange={(e) => setDistance(e.target.value)}
+            placeholder="Enter value"
+          />
+        </div>
+  
+        {/* Motor function buttons */}
+        <div className="button-container">
+  <div className="button-row">
+    <button onClick={() => handleMotorCommand('moveForward')}>Move Forward</button>
+    <button onClick={() => handleMotorCommand('moveBackward')}>Move Backward</button>
+  </div>
+  <div className="button-row">
+    <button onClick={() => handleMotorCommand('translateLeft')}>Translate Left</button>
+    <button onClick={() => handleMotorCommand('translateRight')}>Translate Right</button>
+  </div>
+  <div className="button-row">
+    <button onClick={() => handleMotorCommand('rotateClockwise')}>Rotate Clockwise</button>
+    <button onClick={() => handleMotorCommand('rotateCounterClockwise')}>Rotate Counter-Clockwise</button>
+  </div>
+  <div className="button-row">
+    <button className="emergency" onClick={() => handleMotorCommand('estop')}>EMERGENCY</button>
+  </div>
+</div>
 
-      <label htmlFor="layout-select">Choose a layout:</label>
-      <select id="layout-select" onChange={handleLayoutSelection}>
-        <option value="">--Select a layout--</option>
-        {layouts.map((layout) => (
-          <option key={layout._id} value={layout._id}>
-            {layout.layoutName || 'Untitled Layout'}
-          </option>
-        ))}
-      </select>
-
-      {/* Dropdown for selecting a chair */}
-      <div>
-        <label htmlFor="chair-select">Select Chair:</label>
-        <select id="chair-select" onChange={handleChairSelection} value={selectedChair}>
-          <option value="">--Select a Chair--</option>
-          <option value="chair1">Chair 1 (192.168.4.3)</option>
-          <option value="chair2">Chair 2 (192.168.4.4)</option>
-        </select>
       </div>
-
-      {/* Input box for distance or degree */}
-      <div>
-        <label htmlFor="distance-input">Enter Distance/Rotation (inches or degrees):</label>
-        <input
-          id="distance-input"
-          type="number"
-          value={distance}
-          onChange={(e) => setDistance(e.target.value)}
-          placeholder="Enter value"
-        />
-      </div>
-
-      {/* Motor function buttons */}
-      <div style={{ marginTop: '10px' }}>
-        <button onClick={() => handleMotorCommand('moveForward')}>Move Forward</button>
-        <button onClick={() => handleMotorCommand('moveBackward')}>Move Backward</button>
-        <button onClick={() => handleMotorCommand('translateLeft')}>Translate Left</button>
-        <button onClick={() => handleMotorCommand('translateRight')}>Translate Right</button>
-        <button onClick={() => handleMotorCommand('rotateClockwise')}>Rotate Clockwise</button>
-        <button onClick={() => handleMotorCommand('rotateCounterClockwise')}>Rotate Counter-Clockwise</button>
-        <button onClick={() => handleMotorCommand('estop')}>EMERGENCY</button>
-      </div>
-
-      {/* Display the selected layout and render the chairs */}
+  
+      {/* Layout box below */}
       {selectedLayout && (
         <div>
-          <h2>{selectedLayout.layoutName || 'Untitled Layout'}</h2>
-          <p>Layout ID: {selectedLayout._id}</p>
-
-          {/* Render the chair elements */}
           <div className="layout-container">
             {Array.isArray(selectedLayout.items) && selectedLayout.items.length > 0 ? (
               selectedLayout.items.map((item, index) => (
@@ -176,6 +180,7 @@ const Overview = () => {
       )}
     </div>
   );
+  
 };
 
 export default Overview;

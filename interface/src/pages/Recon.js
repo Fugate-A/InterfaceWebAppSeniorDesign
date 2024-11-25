@@ -280,22 +280,23 @@ const Recon = () => {
           </select>
 
           <div className="layout-display">
-            {currentPositions.map((item, index) =>
-              item && item.x !== undefined && item.y !== undefined ? (
-                <div
-                  key={index}
-                  className="chair"
-                  style={{
-                    transform: `translate(${item.x}px, ${item.y}px) rotate(${item.rotation || 0}deg)`,
-                    position: 'absolute',
-                    transition: 'transform 0.1s ease-out',
-                  }}
-                >
-                  Chair {index + 1} (x: {item.x}, y: {item.y}, rotation: {item.rotation}°)
-                </div>
-              ) : null
-            )}
-          </div>
+  <div className="layout-container">
+    {currentPositions.map((item, index) =>
+      item && item.x !== undefined && item.y !== undefined ? (
+        <div
+          key={index}
+          className="chair"
+          style={{
+            transform: `translate(${item.x}px, ${item.y}px)`,
+          }}
+        >
+          Chair {index + 1}
+        </div>
+      ) : null
+    )}
+  </div>
+</div>
+
         </>
       )}
     </div>

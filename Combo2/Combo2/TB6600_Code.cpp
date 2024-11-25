@@ -92,7 +92,7 @@ void translateRight(int steps) {
   digitalWrite(DIRFR, LOW);
   digitalWrite(DIRRR, HIGH);
 
-  for (int i = 0; i < steps - 60; i++) {
+  for (int i = 0; i < steps; i++) {
        digitalWrite(PULFL, HIGH);
       digitalWrite(PULFR, HIGH);
       digitalWrite(PULRL, HIGH);
@@ -120,7 +120,7 @@ void translateLeft(int steps) {
   digitalWrite(DIRFR, HIGH);
   digitalWrite(DIRRR, LOW);
     // Constant speed phase
-    for (int i = 0; i < steps - 60; i++) {
+    for (int i = 0; i < steps; i++) {
        digitalWrite(PULFL, HIGH);
       digitalWrite(PULFR, HIGH);
       digitalWrite(PULRL, HIGH);
